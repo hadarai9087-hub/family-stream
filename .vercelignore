@@ -1,0 +1,13 @@
+# Vercel Deployment Ignore
+.git
+.agents
+scripts
+logs
+*.log
+.env.local
+.env.development.local
+.env.test.local
+.next/standalone
+test-results
+coverage
+pm2-*.log

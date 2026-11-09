@@ -1,0 +1,135 @@
+import QRCode from "qrcode";
+import { supabase, isSupabaseConfigured } from "./supabase";
+import { Account, authManager } from "./auth";
+
+export interface TvPairSession {
+  code: string;
+  qrDataUrl: string;
+  expiresAt: number;
+}
+
+export interface TvPairApprovalData {
+  account: Account;
+  profileId?: string;
+}
+
+/**
+ * Generates a 6-character alphanumeric pairing code and its QR code
+ */
+export async function generateTvPairSession(): Promise<TvPairSession> {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  // Generate pair URL pointing to current app /pair route with ?code=...
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
+  const pairUrl = `${baseUrl}/pair?code=${code}`;
+
+  const qrDataUrl = await QRCode.toDataURL(pairUrl, {
+    width: 320,
+    margin: 2,
+    color: {
+      dark: "#000000",
+      light: "#ffffff",
+    },
+  });
+
+  const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes expiry
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      // Clean up old expired sessions to prevent storage accumulation
+      await supabase.from("tv_pairings").delete().lt("expires_at", new Date().toISOString());
+      await supabase.from("tv_pairings").insert({
+        code,
+        status: "pending",
+        expires_at: new Date(expiresAt).toISOString(),
+      });
+    } catch (e) {
+      console.warn("Supabase tv_pairings insert error:", e);
+    }
+  }
+
+  return { code, qrDataUrl, expiresAt };
+}
+
+/**
+ * Approves a TV pairing session from phone/web
+ * Passes the logged in account so TV receives the session
+ */
+export async function approveTvPairSession(code: string, account: Account, profileId?: string): Promise<boolean> {
+  const data: TvPairApprovalData = { account, profileId };
+
+  if (isSupabaseConfigured && supabase) {
+    const { error } = await supabase
+      .from("tv_pairings")
+      .update({
+        status: "approved",
+        account_data: JSON.stringify(account),
+        profile_id: profileId,
+      })
+      .eq("code", code.toUpperCase());
+    return !error;
+  }
+
+  // Local storage broadcast for same network / demo:
+  if (typeof window !== "undefined") {
+    localStorage.setItem(`tv_pair_approved_${code.toUpperCase()}`, JSON.stringify(data));
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Listens to pairing status on the TV.
+ * When approved, sets the account on the TV and calls onApproved.
+ */
+export function listenToTvPairSession(code: string, onApproved: (data: TvPairApprovalData) => void): () => void {
+  if (isSupabaseConfigured && supabase) {
+    const channel = supabase
+      .channel(`tv_pair_${code}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "tv_pairings", filter: `code=eq.${code}` },
+        (payload: any) => {
+          if (payload.new.status === "approved") {
+            try {
+              let account: Account = JSON.parse(payload.new.account_data || "{}");
+              authManager.setAccount(account);
+              supabase?.removeChannel(channel);
+              onApproved({ account, profileId: payload.new.profile_id });
+            } catch (e) {
+              console.error("Error handling approved pairing:", e);
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase?.removeChannel(channel);
+    };
+  }
+
+  // Local poll fallback
+  const interval = setInterval(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(`tv_pair_approved_${code.toUpperCase()}`);
+      if (stored) {
+        clearInterval(interval);
+        localStorage.removeItem(`tv_pair_approved_${code.toUpperCase()}`);
+        try {
+          const parsed: TvPairApprovalData = JSON.parse(stored);
+          authManager.setAccount(parsed.account);
+          onApproved(parsed);
+        } catch (e) {
+          console.error("Failed to parse TV pairing payload:", e);
+        }
+      }
+    }
+  }, 1200);
+
+  return () => clearInterval(interval);
+}

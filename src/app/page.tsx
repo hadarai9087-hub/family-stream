@@ -16,6 +16,7 @@ import { MediaItem, UserProfile, WatchProgress } from "@/types";
 import { Navbar } from "@/components/Navbar";
 import { HeroBanner } from "@/components/HeroBanner";
 import { MediaRow } from "@/components/MediaRow";
+import { MediaCard } from "@/components/MediaCard";
 import { ProfileSelector } from "@/components/ProfileSelector";
 import { EpisodesModal } from "@/components/EpisodesModal";
 import { PlayerModal } from "@/components/PlayerModal";
@@ -294,13 +295,12 @@ export default function HomePage() {
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {searchResults.map((item) => (
-                  <div key={item.id} className="cursor-pointer">
-                    <MediaRow
-                      title=""
-                      items={[item]}
+                  <div key={item.id} className="flex justify-center">
+                    <MediaCard
+                      item={item}
                       onPlay={handlePlay}
                       onMoreInfo={(i) => setInfoItem(i)}
-                      myListIds={myListIds}
+                      isInMyList={myListIds.includes(item.id)}
                       onToggleMyList={handleToggleMyList}
                     />
                   </div>

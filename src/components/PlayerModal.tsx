@@ -499,7 +499,6 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
             tabIndex={-1}
             onLoad={handleIframeLoad}
             onError={handleIframeError}
-            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
             className="w-full h-full border-0 bg-black"
             referrerPolicy="no-referrer"
             allow="autoplay; fullscreen; encrypted-media; picture-in-picture; screen-wake-lock; clipboard-write"

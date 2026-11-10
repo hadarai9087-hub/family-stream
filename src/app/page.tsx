@@ -23,6 +23,7 @@ import { TvPairModal } from "@/components/TvPairModal";
 import { TvFirstLoginScreen } from "@/components/TvFirstLoginScreen";
 import { LoginScreen } from "@/components/LoginScreen";
 import { TvSidebar } from "@/components/TvSidebar";
+import { UserCornerMenu } from "@/components/UserCornerMenu";
 import { authManager, UserAccount } from "@/lib/auth";
 
 export default function HomePage() {
@@ -229,12 +230,6 @@ export default function HomePage() {
 
       {/* Top Navbar */}
       <Navbar
-        currentProfile={virtualProfile}
-        onSelectProfile={handleLogout}
-        onLogout={handleLogout}
-        isTvMode={isTvMode}
-        onToggleTvMode={toggleTvMode}
-        onOpenTvPair={() => setIsTvPairOpen(true)}
         onSearch={handleSearch}
         activeTab={activeTab}
         onSelectTab={(tab) => {
@@ -435,6 +430,10 @@ export default function HomePage() {
             setAccount(acc);
           }}
         />
+      )}
+      {/* Floating Bottom-Right User Profile & Settings Menu (ימינה למטה) */}
+      {!isTvMode && (
+        <UserCornerMenu account={account} onLogout={handleLogout} />
       )}
     </div>
   );

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { soundEffects } from "./soundEffects";
 
 export function useTvMode() {
-  const [isTvMode, setIsTvMode] = useState<boolean>(true);
+  const [isTvMode, setIsTvMode] = useState<boolean>(false);
 
   useEffect(() => {
     // Check if user explicitly set TV mode preference
@@ -14,8 +14,12 @@ export function useTvMode() {
       return;
     }
 
-    // Default to TV-First Mode!
-    setIsTvMode(true);
+    // Auto-detect if device is Smart TV or URL query has ?tv=1
+    if (typeof window !== "undefined") {
+      const isTvDevice = /smart-tv|android tv|googletv|appletv|hbbtv/i.test(navigator.userAgent);
+      const isTvUrl = new URLSearchParams(window.location.search).get("tv") === "1";
+      setIsTvMode(isTvDevice || isTvUrl);
+    }
   }, []);
 
   const toggleTvMode = () => {

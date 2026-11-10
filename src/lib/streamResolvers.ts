@@ -63,19 +63,8 @@ export function resolveStreamSources(options: StreamResolutionOptions): StreamSo
     // Tier 1: Dedicated Clean Servers & High-Performance Engines
     // -------------------------------------------------------------
     {
-      id: "vidlink-pro",
-      name: "VidLink Pro (שרת ייעודי FHD / 4K)",
-      type: "embed",
-      tier: 1,
-      sandboxed: true,
-      quality: "4K / 1080p FHD",
-      url: isMovie
-        ? `https://vidlink.pro/movie/${tmdbId}?primaryColor=e50914&autoplay=true${startParam}`
-        : `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?primaryColor=e50914&autoplay=true${startParam}`,
-    },
-    {
       id: "pressplayx",
-      name: "PressPlay (שרת ייעודי מהיר)",
+      name: "PressPlay (שרת ראשי מהיר)",
       type: "embed",
       tier: 1,
       sandboxed: true,
@@ -85,19 +74,8 @@ export function resolveStreamSources(options: StreamResolutionOptions): StreamSo
         : `https://moviesapi.to/tv/${tmdbId}-${season}-${episode}?theme=e50914${startParam}`,
     },
     {
-      id: "streamingunity",
-      name: "StreamingUnity (שרת ייעודי ישיר)",
-      type: "embed",
-      tier: 1,
-      sandboxed: true,
-      quality: "1080p HD",
-      url: isMovie
-        ? `https://streamingunity.com/movie/${tmdbId}${startQuery}`
-        : `https://streamingunity.com/tv/${tmdbId}/${season}/${episode}${startQuery}`,
-    },
-    {
       id: "autoembed-direct",
-      name: "AutoEmbed Direct (נגן ייעודי ישיר)",
+      name: "AutoEmbed Direct (נגן ישיר ללא חסימות)",
       type: "embed",
       tier: 1,
       sandboxed: true,
@@ -116,6 +94,28 @@ export function resolveStreamSources(options: StreamResolutionOptions): StreamSo
       url: isMovie
         ? `https://vidsrc.pm/embed/movie/${tmdbId}${startQuery}`
         : `https://vidsrc.pm/embed/tv/${tmdbId}/${season}/${episode}${startQuery}`,
+    },
+    {
+      id: "streamingunity",
+      name: "StreamingUnity (שרת ישיר נקי)",
+      type: "embed",
+      tier: 1,
+      sandboxed: true,
+      quality: "1080p HD",
+      url: isMovie
+        ? `https://streamingunity.com/movie/${tmdbId}${startQuery}`
+        : `https://streamingunity.com/tv/${tmdbId}/${season}/${episode}${startQuery}`,
+    },
+    {
+      id: "vidlink-pro",
+      name: "VidLink Pro (שרת גיבוי FHD)",
+      type: "embed",
+      tier: 1,
+      sandboxed: true,
+      quality: "4K / 1080p FHD",
+      url: isMovie
+        ? `https://vidlink.pro/movie/${tmdbId}?primaryColor=e50914&autoplay=true${startParam}`
+        : `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?primaryColor=e50914&autoplay=true${startParam}`,
     },
     {
       id: "cinecat-engine",

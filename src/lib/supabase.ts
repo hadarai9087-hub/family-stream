@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { UserProfile, WatchProgress, MediaItem } from "@/types";
+import { firebaseManager, isFirebaseConfigured } from "./firebase";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
@@ -95,6 +96,15 @@ export const storageManager = {
 
   // --- Watch Progress ("Continue Watching" / "הבא בתור") ---
   getWatchProgress: async (userId: string): Promise<WatchProgress[]> => {
+    if (isFirebaseConfigured) {
+      try {
+        const fbItems = await firebaseManager.getWatchProgress(userId);
+        if (fbItems && fbItems.length > 0) return fbItems;
+      } catch (err) {
+        console.warn("Firebase getWatchProgress error:", err);
+      }
+    }
+
     if (isSupabaseConfigured && supabase) {
       try {
         // Try user_watch_progress first, then fallback to watch_progress
@@ -224,7 +234,11 @@ export const storageManager = {
       localStorage.setItem(key, JSON.stringify(filtered));
     }
 
-    // 2. Throttled cloud upsert to Supabase (12s throttle)
+    // 2. Throttled cloud upsert to Supabase & Firebase
+    if (isFirebaseConfigured) {
+      firebaseManager.saveWatchProgress(userId, item).catch(() => {});
+    }
+
     if (isSupabaseConfigured && supabase) {
       const now = Date.now();
       const lastSave = lastWatchProgressSaved[uniqueKey] || 0;
@@ -282,6 +296,10 @@ export const storageManager = {
   },
 
   removeFromWatchProgress: async (userId: string, mediaId: number): Promise<void> => {
+    if (isFirebaseConfigured) {
+      firebaseManager.removeFromWatchProgress(userId, mediaId).catch(() => {});
+    }
+
     if (isSupabaseConfigured && supabase) {
       try {
         await Promise.all([
@@ -306,6 +324,15 @@ export const storageManager = {
 
   // --- Watchlist ("My List" / "הרשימה שלי") ---
   getWatchlist: async (userId: string): Promise<MediaItem[]> => {
+    if (isFirebaseConfigured) {
+      try {
+        const fbList = await firebaseManager.getWatchlist(userId);
+        if (fbList && fbList.length > 0) return fbList;
+      } catch (err) {
+        console.warn("Firebase getWatchlist failed:", err);
+      }
+    }
+
     if (isSupabaseConfigured && supabase) {
       try {
         const { data, error } = await supabase.from("user_watchlist").select("*").eq("user_id", userId);
@@ -377,6 +404,9 @@ export const storageManager = {
         localStorage.setItem(`watchlist_${userId}`, JSON.stringify(updated));
         localStorage.setItem(`my_list_${userId}`, JSON.stringify(updated));
       }
+      if (isFirebaseConfigured) {
+        firebaseManager.toggleWatchlist(userId, item).catch(() => {});
+      }
       if (isSupabaseConfigured && supabase) {
         try {
           await supabase.from("user_watchlist").upsert(
@@ -404,6 +434,9 @@ export const storageManager = {
     if (typeof window !== "undefined") {
       localStorage.setItem(`watchlist_${userId}`, JSON.stringify(updated));
       localStorage.setItem(`my_list_${userId}`, JSON.stringify(updated));
+    }
+    if (isFirebaseConfigured) {
+      firebaseManager.toggleWatchlist(userId, { id: mediaId } as any).catch(() => {});
     }
     if (isSupabaseConfigured && supabase) {
       try {

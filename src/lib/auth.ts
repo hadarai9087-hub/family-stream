@@ -1,4 +1,5 @@
 import { isSupabaseConfigured, supabase } from "./supabase";
+import { firebaseManager, isFirebaseConfigured } from "./firebase";
 import { UserAccount, UserSession } from "@/types";
 
 export type { UserAccount, UserSession };
@@ -155,6 +156,11 @@ export const authManager = {
       lastLoginAt: new Date().toISOString(),
       token: "session_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6),
     };
+
+    // If Firebase is configured, sync to Firestore users collection in background
+    if (isFirebaseConfigured) {
+      firebaseManager.saveUser(account).catch(() => {});
+    }
 
     // If Supabase is available, sync to users table in background
     if (isSupabaseConfigured && supabase) {

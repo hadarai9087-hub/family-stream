@@ -1,5 +1,6 @@
 import QRCode from "qrcode";
 import { supabase, isSupabaseConfigured } from "./supabase";
+import { firebaseManager, isFirebaseConfigured } from "./firebase";
 import { Account, authManager } from "./auth";
 
 export interface TvPairSession {
@@ -47,7 +48,12 @@ export async function generateTvPairSession(): Promise<TvPairSession> {
     }).catch(() => {});
   }
 
-  // 2. Notify Supabase if configured
+  // 2. Notify Firebase if configured
+  if (isFirebaseConfigured) {
+    firebaseManager.saveTvPairing(code, expiresAt).catch(() => {});
+  }
+
+  // 3. Notify Supabase if configured
   if (isSupabaseConfigured && supabase) {
     try {
       await supabase.from("tv_pairings").delete().lt("expires_at", new Date().toISOString());
@@ -88,7 +94,13 @@ export async function approveTvPairSession(code: string, account: Account, profi
     }
   }
 
-  // 2. Update Supabase if configured
+  // 2. Update Firebase if configured
+  if (isFirebaseConfigured) {
+    const fbOk = await firebaseManager.approveTvPairing(cleanCode, account);
+    if (fbOk) apiSuccess = true;
+  }
+
+  // 3. Update Supabase if configured
   if (isSupabaseConfigured && supabase) {
     const { error } = await supabase
       .from("tv_pairings")
@@ -125,7 +137,15 @@ export function listenToTvPairSession(code: string, onApproved: (data: TvPairApp
     onApproved(data);
   };
 
-  // 1. Supabase Realtime channel if configured
+  // 1. Firebase Firestore Realtime listener if configured
+  let firebaseUnsubscribe: (() => void) | null = null;
+  if (isFirebaseConfigured) {
+    firebaseUnsubscribe = firebaseManager.listenTvPairing(cleanCode, (account) => {
+      handleApproval({ account });
+    });
+  }
+
+  // 2. Supabase Realtime channel if configured
   let supabaseChannel: any = null;
   if (isSupabaseConfigured && supabase) {
     supabaseChannel = supabase
@@ -190,6 +210,9 @@ export function listenToTvPairSession(code: string, onApproved: (data: TvPairApp
 
   return () => {
     clearInterval(interval);
+    if (firebaseUnsubscribe) {
+      firebaseUnsubscribe();
+    }
     if (supabaseChannel && supabase) {
       supabase.removeChannel(supabaseChannel);
     }

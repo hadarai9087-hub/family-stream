@@ -12,18 +12,17 @@ import {
 export interface GenreMeta {
   id: number;
   name: string;
-  emoji: string;
 }
 
 export const HEBREW_GENRES: GenreMeta[] = [
-  { id: 28, name: "פעולה ואקשן", emoji: "💥" },
-  { id: 878, name: "מד\"ב ופנטזיה", emoji: "🚀" },
-  { id: 35, name: "קומדיה", emoji: "😂" },
-  { id: 18, name: "דרמה", emoji: "🎭" },
-  { id: 53, name: "מתח ומסתורין", emoji: "🔍" },
-  { id: 16, name: "אנימציה", emoji: "🎨" },
-  { id: 80, name: "פשע", emoji: "🔪" },
-  { id: 99, name: "דוקומנטרי", emoji: "🌍" },
+  { id: 28, name: "פעולה ואקשן" },
+  { id: 878, name: "מד\"ב ופנטזיה" },
+  { id: 35, name: "קומדיה" },
+  { id: 18, name: "דרמה" },
+  { id: 53, name: "מתח ומסתורין" },
+  { id: 16, name: "אנימציה" },
+  { id: 80, name: "פשע" },
+  { id: 99, name: "דוקומנטרי" },
 ];
 
 /**

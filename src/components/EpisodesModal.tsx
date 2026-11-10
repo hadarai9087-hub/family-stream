@@ -214,7 +214,10 @@ export const EpisodesModal: React.FC<EpisodesModalProps> = ({
                 </div>
                 <div className="bg-white/5 p-3.5 rounded-xl border border-white/5">
                   <span className="text-neutral-400 block mb-1 text-xs">דירוג עולמי:</span>
-                  <span className="font-bold text-[#46d369]">★ {item.vote_average} / 10</span>
+                  <span className="font-bold text-[#46d369] flex items-center gap-1">
+                    <Star size={13} className="fill-current text-[#46d369]" />
+                    <span>{item.vote_average} / 10</span>
+                  </span>
                 </div>
                 {item.genres && item.genres.length > 0 && (
                   <div className="bg-white/5 p-3.5 rounded-xl border border-white/5 col-span-2 sm:col-span-3">

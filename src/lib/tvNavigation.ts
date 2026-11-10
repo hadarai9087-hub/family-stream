@@ -7,25 +7,27 @@ export function useTvMode() {
   const [isTvMode, setIsTvMode] = useState<boolean>(false);
 
   useEffect(() => {
-    // Check if user explicitly set TV mode preference
-    const stored = localStorage.getItem("tv_mode_enabled");
-    if (stored !== null) {
-      setIsTvMode(stored === "true");
+    if (typeof window === "undefined") return;
+
+    // Check URL query ?tv=1 or dedicated /tv route
+    const isTvUrl = new URLSearchParams(window.location.search).get("tv") === "1" ||
+      window.location.pathname.startsWith("/tv");
+
+    // Auto-detect if device is Smart TV User Agent
+    const isTvDevice = /smart-tv|android tv|googletv|appletv|hbbtv/i.test(navigator.userAgent);
+
+    // If explicit query or TV device detected, enable TV mode
+    if (isTvUrl || isTvDevice) {
+      setIsTvMode(true);
       return;
     }
 
-    // Auto-detect if device is Smart TV or URL query has ?tv=1
-    if (typeof window !== "undefined") {
-      const isTvDevice = /smart-tv|android tv|googletv|appletv|hbbtv/i.test(navigator.userAgent);
-      const isTvUrl = new URLSearchParams(window.location.search).get("tv") === "1";
-      setIsTvMode(isTvDevice || isTvUrl);
-    }
+    // Default to false for desktop / mobile browsers
+    setIsTvMode(false);
   }, []);
 
   const toggleTvMode = () => {
-    const next = !isTvMode;
-    setIsTvMode(next);
-    localStorage.setItem("tv_mode_enabled", String(next));
+    setIsTvMode((prev) => !prev);
   };
 
   return { isTvMode, toggleTvMode };

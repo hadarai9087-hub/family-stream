@@ -21,7 +21,6 @@ export default function DownloadPage() {
 
   const handleDownloadApk = () => {
     setDownloadStarted(true);
-    // Trigger download
     const link = document.createElement("a");
     link.href = "/downloads/hm-stream-tv.apk";
     link.download = "HM-Stream-AndroidTV.apk";
@@ -29,6 +28,14 @@ export default function DownloadPage() {
     link.click();
     document.body.removeChild(link);
   };
+
+  React.useEffect(() => {
+    // Auto-trigger download when user lands on download portal
+    const timer = setTimeout(() => {
+      handleDownloadApk();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0e0e10] text-white selection:bg-[#e50914] selection:text-white" dir="rtl">

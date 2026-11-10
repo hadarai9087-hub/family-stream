@@ -51,12 +51,7 @@ export const TvFirstLoginScreen: React.FC<TvFirstLoginScreenProps> = ({ onLoginS
     };
   }, [onLoginSuccess]);
 
-  // Demo simulation button: instant 1-click test of phone scan
-  const handleSimulatePhoneApproval = () => {
-    if (session) {
-      approveTvPairSession(session.code, DEFAULT_FAMILY_ACCOUNT);
-    }
-  };
+
 
   const handleManualLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -219,33 +214,23 @@ export const TvFirstLoginScreen: React.FC<TvFirstLoginScreenProps> = ({ onLoginS
               </div>
             )}
 
-            {/* Quick Testing Actions */}
+            {/* TV Actions */}
             <div className="flex items-center gap-4 mt-6 flex-wrap">
               <button
                 type="button"
-                onClick={handleSimulatePhoneApproval}
-                className="bg-white/10 hover:bg-white/20 border border-white/15 text-white text-xs md:text-sm font-semibold px-4 py-2.5 rounded-xl transition-all tv-focusable flex items-center gap-2 cursor-pointer"
-                title="סימולציה בלחיצה אחת לאישור מהטלפון"
-              >
-                <Smartphone size={16} className="text-[#46d369]" />
-                <span>סימולציית אישור מהטלפון (Demo)</span>
-              </button>
-
-              <button
-                type="button"
                 onClick={refreshPairCode}
-                className="text-neutral-400 hover:text-white text-xs md:text-sm transition-colors flex items-center gap-1.5 tv-focusable cursor-pointer"
+                className="bg-white/10 hover:bg-white/20 border border-white/15 text-white text-xs md:text-sm font-semibold px-4 py-2.5 rounded-xl transition-all tv-focusable flex items-center gap-2 cursor-pointer"
               >
                 <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
-                <span>רענן קוד</span>
+                <span>רענן קוד התחברות</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setShowManualLogin(true)}
-                className="text-neutral-500 hover:text-neutral-300 text-xs transition-colors cursor-pointer"
+                className="text-neutral-400 hover:text-white text-xs md:text-sm transition-colors cursor-pointer py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10"
               >
-                התחבר ישירות עם אימייל &larr;
+                התחבר ישירות עם אימייל בשלט &larr;
               </button>
             </div>
           </div>

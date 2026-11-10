@@ -192,12 +192,12 @@ export default function HomePage() {
     setAccount(null);
   };
 
-  // Gating: If not logged in, render LoginScreen or TV-first pairing screen
+  // Gating: If not logged in, render TV pairing screen on TV, or clean PC/Mobile LoginScreen on web
   if (!account) {
     return isTvMode ? (
       <TvFirstLoginScreen onLoginSuccess={setAccount} />
     ) : (
-      <LoginScreen isTvMode={false} onLoginSuccess={setAccount} />
+      <LoginScreen onLoginSuccess={setAccount} />
     );
   }
 

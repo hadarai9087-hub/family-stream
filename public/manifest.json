@@ -1,0 +1,24 @@
+{
+  "name": "HM STREAM",
+  "short_name": "HMSTREAM",
+  "description": "פלטפורמת סטרימינג אישית לקולנוע וסדרות",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0d0d0e",
+  "theme_color": "#e50914",
+  "dir": "rtl",
+  "lang": "he",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -142,7 +142,6 @@ export const RecommendationSection: React.FC<RecommendationSectionProps> = ({
                     : "bg-neutral-900/80 hover:bg-neutral-800 text-neutral-300 border border-white/10 hover:border-white/20"
                 }`}
               >
-                <span>{g.emoji}</span>
                 <span>{g.name}</span>
               </button>
             );

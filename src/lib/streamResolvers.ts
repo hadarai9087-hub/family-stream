@@ -18,21 +18,15 @@ export interface ProviderTierInfo {
 }
 
 export const PROVIDER_TIERS: Record<number, ProviderTierInfo> = {
-  1: { tier: 1, name: "שרתי עילית (FHD / 4K)", badge: "Tier 1" },
-  2: { tier: 2, name: "שרתים גלובליים ישירים", badge: "Tier 2" },
-  3: { tier: 3, name: "שרתי CDN ורשתות הפצה", badge: "Tier 3" },
-  4: { tier: 4, name: "שרתי גיבוי וארכיון", badge: "Tier 4" },
+  1: { tier: 1, name: "שרתי עילית (FHD / 4K ישירים)", badge: "Tier 1" },
+  2: { tier: 2, name: "שרתי הזרמה ייעודיים ונקיים", badge: "Tier 2" },
+  3: { tier: 3, name: "שרתי CDN ורשתות הפצה עולמיות", badge: "Tier 3" },
+  4: { tier: 4, name: "שרתי גיבוי ורב-מקורות", badge: "Tier 4" },
 };
 
 /**
- * Returns 12 verified live providers grouped into 4 high-availability tiers.
- * Excludes dead providers (embed.su, vixcloud.co, nepu.to, rivestream, vidsrc.xyz)
- * and frame-denied primeshows.org (X-Frame-Options: DENY).
- *
- * Tier 1: VidLink Pro, Cinecat Engine, Atlantic Server
- * Tier 2: AutoEmbed Direct, VidSrc Pro, PressPlayX
- * Tier 3: VidSrc.to, AutoEmbed Portal, VidSrc Classic Mirror
- * Tier 4: MultiEmbed, 2Embed Global, SmashyStream
+ * Returns verified, live dedicated streaming servers without anti-sandbox blockers.
+ * Excludes dead providers and anti-sandbox blockers (vidlink.pro, streamingunity, embed.su, vixcloud.co).
  */
 export function resolveStreamSources(options: StreamResolutionOptions): StreamSource[] {
   const {
@@ -50,39 +44,41 @@ export function resolveStreamSources(options: StreamResolutionOptions): StreamSo
   const resumePos = Math.floor(startAt ?? resumeSeconds ?? 0);
   const startParam = resumePos > 0 ? `&startAt=${resumePos}` : "";
   const startQuery = resumePos > 0 ? `?startAt=${resumePos}` : "";
+
   let fullSubtitleUrl = subtitleUrl;
   if (fullSubtitleUrl && fullSubtitleUrl.startsWith("/") && typeof window !== "undefined") {
     fullSubtitleUrl = `${window.location.origin}${fullSubtitleUrl}`;
   }
+
   const subParam = fullSubtitleUrl
     ? `&sub_file=${encodeURIComponent(fullSubtitleUrl)}&sub_label=${encodeURIComponent(subtitleLabel)}`
     : "";
 
   const sources: StreamSource[] = [
     // -------------------------------------------------------------
-    // Tier 1: Dedicated Clean Servers & High-Performance Engines
+    // Tier 1: Dedicated Clean Servers (Direct, fast, sandboxed)
     // -------------------------------------------------------------
     {
       id: "pressplayx",
-      name: "PressPlay (שרת ראשי מהיר)",
+      name: "PressPlay (שרת ראשי ייעודי)",
       type: "embed",
       tier: 1,
       sandboxed: true,
       quality: "1080p FHD",
       url: isMovie
-        ? `https://moviesapi.to/movie/${tmdbId}?theme=e50914${startParam}`
-        : `https://moviesapi.to/tv/${tmdbId}-${season}-${episode}?theme=e50914${startParam}`,
+        ? `https://moviesapi.to/movie/${tmdbId}?theme=e50914${startParam}${subParam}`
+        : `https://moviesapi.to/tv/${tmdbId}-${season}-${episode}?theme=e50914${startParam}${subParam}`,
     },
     {
       id: "autoembed-direct",
-      name: "AutoEmbed Direct (נגן ישיר ללא חסימות)",
+      name: "AutoEmbed Direct (נגן ישיר תומך כתוביות)",
       type: "embed",
       tier: 1,
       sandboxed: true,
       quality: "1080p HD",
       url: isMovie
-        ? `https://player.autoembed.co/embed/movie/${tmdbId}${startQuery}`
-        : `https://player.autoembed.co/embed/tv/${tmdbId}/${season}-${episode}/${startQuery}`,
+        ? `https://player.autoembed.co/embed/movie/${tmdbId}${startQuery ? `${startQuery}${subParam}` : subParam ? `?${subParam.slice(1)}` : ""}`
+        : `https://player.autoembed.co/embed/tv/${tmdbId}/${season}-${episode}/${startQuery ? `${startQuery}${subParam}` : subParam ? `?${subParam.slice(1)}` : ""}`,
     },
     {
       id: "vidsrc-pm",
@@ -96,30 +92,19 @@ export function resolveStreamSources(options: StreamResolutionOptions): StreamSo
         : `https://vidsrc.pm/embed/tv/${tmdbId}/${season}/${episode}${startQuery}`,
     },
     {
-      id: "streamingunity",
-      name: "StreamingUnity (שרת ישיר נקי)",
+      id: "flixtrz",
+      name: "Flixtrz (שרת ייעודי מהיר)",
       type: "embed",
       tier: 1,
       sandboxed: true,
       quality: "1080p HD",
       url: isMovie
-        ? `https://streamingunity.com/movie/${tmdbId}${startQuery}`
-        : `https://streamingunity.com/tv/${tmdbId}/${season}/${episode}${startQuery}`,
-    },
-    {
-      id: "vidlink-pro",
-      name: "VidLink Pro (שרת גיבוי FHD)",
-      type: "embed",
-      tier: 1,
-      sandboxed: true,
-      quality: "4K / 1080p FHD",
-      url: isMovie
-        ? `https://vidlink.pro/movie/${tmdbId}?primaryColor=e50914&autoplay=true${startParam}`
-        : `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?primaryColor=e50914&autoplay=true${startParam}`,
+        ? `https://flixtrz.to/embed/movie/${tmdbId}${startQuery}`
+        : `https://flixtrz.to/embed/tv/${tmdbId}/${season}/${episode}${startQuery}`,
     },
     {
       id: "cinecat-engine",
-      name: "Cinecat Engine (גיבוי מהיר)",
+      name: "Cinecat Engine (שרת עילית)",
       type: "embed",
       tier: 1,
       sandboxed: true,
@@ -130,7 +115,7 @@ export function resolveStreamSources(options: StreamResolutionOptions): StreamSo
     },
     {
       id: "atlantic-server",
-      name: "Atlantic Server (גיבוי יציב)",
+      name: "Atlantic Server (הזרמה יציבה)",
       type: "embed",
       tier: 1,
       sandboxed: true,
@@ -153,17 +138,6 @@ export function resolveStreamSources(options: StreamResolutionOptions): StreamSo
       url: isMovie
         ? `https://vidsrc.to/embed/movie/${tmdbId}${startQuery}`
         : `https://vidsrc.to/embed/tv/${tmdbId}/${season}/${episode}${startQuery}`,
-    },
-    {
-      id: "autoembed-portal",
-      name: "AutoEmbed Portal",
-      type: "embed",
-      tier: 3,
-      sandboxed: true,
-      quality: "1080p Auto",
-      url: isMovie
-        ? `https://autoembed.co/movie/tmdb/${tmdbId}${startQuery}`
-        : `https://autoembed.co/tv/tmdb/${tmdbId}-${season}-${episode}${startQuery}`,
     },
     {
       id: "vidsrc-me",

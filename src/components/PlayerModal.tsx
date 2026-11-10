@@ -162,23 +162,25 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
   const [hasSkippedIntro, setHasSkippedIntro] = useState(false);
   const isIntroWindow =
     item.media_type === "tv" &&
-    currentTime >= 5 &&
-    currentTime <= introData.end &&
-    !hasSkippedIntro;
+    !hasSkippedIntro &&
+    currentTime >= Math.max(0, introData.start - 3) &&
+    currentTime <= introData.end;
 
   // Reset skip flag when rewinding back before intro window (R4.05)
   useEffect(() => {
-    if (currentTime < 5 && hasSkippedIntro) {
+    if (currentTime < Math.max(0, introData.start - 5) && hasSkippedIntro) {
       setHasSkippedIntro(false);
     }
-  }, [currentTime, hasSkippedIntro]);
+  }, [currentTime, introData.start, hasSkippedIntro]);
 
   const handleSkipIntro = useCallback(() => {
     setHasSkippedIntro(true);
     const targetTime = introData.end > currentTimeRef.current ? introData.end : currentTimeRef.current + 85;
     setCurrentTime(targetTime);
     currentTimeRef.current = targetTime;
-    setStatusMessage("דילגת על הפתיח (+85 שניות)");
+    const minutes = Math.floor(targetTime / 60);
+    const seconds = (targetTime % 60).toString().padStart(2, "0");
+    setStatusMessage(`דולג פתיח (מעבר ל-${minutes}:${seconds})`);
     setStatusVisible(true);
     setTimeout(() => setStatusVisible(false), 2500);
 
@@ -377,24 +379,25 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
     };
   }, [selectedSourceIndex, currentSource, sources.length, advanceToNextServer]);
 
-  // Iframe onLoad Handler: Checks if stream actually broadcasts; auto-switches if dead
+  // Iframe onLoad Handler: Marks server ready upon successful document load
   const handleIframeLoad = () => {
     if (watchdogTimerRef.current) {
       clearTimeout(watchdogTimerRef.current);
       watchdogTimerRef.current = null;
     }
+    if (streamHealthTimerRef.current) {
+      clearTimeout(streamHealthTimerRef.current);
+      streamHealthTimerRef.current = null;
+    }
 
-    setServerStatus("loading");
-    setStatusMessage(`נטען: ${currentSource?.name || "שרת הזרמה"} (מאמת שידור...)`);
+    setServerStatus("ready");
+    setStatusMessage(`מחובר: ${currentSource?.name || "שרת הזרמה"}`);
     setStatusVisible(true);
 
-    if (streamHealthTimerRef.current) clearTimeout(streamHealthTimerRef.current);
-    // 7.5s Stream Broadcast Watchdog: If the player is blank or broken, auto-switch to next server!
-    streamHealthTimerRef.current = setTimeout(() => {
-      if (!playbackVerifiedRef.current) {
-        advanceToNextServer("השרת לא החל בשידור (מעבר אוטומטי לשרת הבא)");
-      }
-    }, 7500);
+    if (statusFadeTimerRef.current) clearTimeout(statusFadeTimerRef.current);
+    statusFadeTimerRef.current = setTimeout(() => {
+      setStatusVisible(false);
+    }, 2500);
   };
 
   // Iframe onError Handler
@@ -407,7 +410,7 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
       clearTimeout(streamHealthTimerRef.current);
       streamHealthTimerRef.current = null;
     }
-    advanceToNextServer("שגיאת טעינה בשרת");
+    advanceToNextServer("שגיאת טעינה בשרת (מעבר אוטומטי)");
   };
 
   // Header auto-hide timer (reveals on mouse move or remote keypress)
@@ -676,10 +679,10 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
           <button
             type="button"
             onClick={handleSkipIntro}
-            className="flex items-center gap-2.5 px-5 py-2.5 rounded-md bg-white hover:bg-neutral-200 text-black font-extrabold text-sm md:text-base shadow-[0_4px_25px_rgba(0,0,0,0.8)] transition-all duration-150 hover:scale-105 active:scale-95 cursor-pointer tv-focusable border border-black/10"
+            className="flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-white hover:bg-neutral-200 text-black font-extrabold text-sm md:text-base shadow-[0_4px_25px_rgba(0,0,0,0.8)] transition-all duration-150 hover:scale-105 active:scale-95 cursor-pointer tv-focusable border border-black/10"
           >
             <span>דלג על פתיח</span>
-            <span className="text-base tracking-tighter">▶|</span>
+            <FastForward size={16} className="fill-black text-black" />
           </button>
         </div>
       )}

@@ -97,12 +97,12 @@ function PairContent() {
               alt="HM Stream"
               width={64}
               height={64}
-              className="h-12 w-auto object-contain drop-shadow-[0_2px_12px_rgba(229,9,20,0.5)]"
+              className="h-12 w-auto object-contain drop-shadow-[0_2px_12px_rgba(var(--accent-rgb),0.5)]"
               priority
             />
           </div>
           <span className="text-white font-black text-xl tracking-wider">
-            HM<span className="text-[#e50914]">STREAM</span>
+            HM<span className="text-[var(--accent-theme)]">STREAM</span>
           </span>
           <p className="text-xs text-neutral-400 mt-1">חיבור מהיר של הטלוויזיה מהטלפון</p>
         </div>
@@ -118,7 +118,7 @@ function PairContent() {
             </p>
             <a
               href="/"
-              className="inline-flex items-center gap-2 bg-[#e50914] hover:bg-[#b80710] text-white font-bold px-7 py-3 rounded-xl text-sm transition-all shadow-xl hover:scale-105 active:scale-95"
+              className="inline-flex items-center gap-2 bg-[var(--accent-theme)] hover:bg-[var(--accent-hover)] text-white font-bold px-7 py-3 rounded-xl text-sm transition-all shadow-xl hover:scale-105 active:scale-95"
             >
               <span>מעבר לצפייה בטלפון</span>
               <ArrowRight size={16} />
@@ -126,7 +126,7 @@ function PairContent() {
           </div>
         ) : (
           <div className="flex flex-col items-center w-full">
-            <div className="w-12 h-12 rounded-2xl bg-[#e50914]/20 border border-[#e50914]/30 text-[#e50914] flex items-center justify-center mb-3">
+            <div className="w-12 h-12 rounded-2xl bg-[rgba(var(--accent-rgb),0.2)] border border-[rgba(var(--accent-rgb),0.3)] text-[var(--accent-theme)] flex items-center justify-center mb-3">
               <Tv size={24} />
             </div>
 
@@ -142,7 +142,7 @@ function PairContent() {
                 maxLength={6}
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
-                className="w-full text-center font-mono font-black text-3xl tracking-widest text-[#e50914] bg-black/70 px-4 py-3 rounded-2xl border border-white/20 focus:border-[#e50914] focus:outline-none uppercase shadow-inner"
+                className="w-full text-center font-mono font-black text-3xl tracking-widest text-[var(--accent-theme)] bg-black/70 px-4 py-3 rounded-2xl border border-white/20 focus:border-[var(--accent-theme)] focus:outline-none uppercase shadow-inner"
                 placeholder="A8X2K9"
               />
             </div>
@@ -170,7 +170,7 @@ function PairContent() {
                   type="button"
                   onClick={handleApproveWithCurrentAccount}
                   disabled={isSubmitting || !code.trim()}
-                  className="w-full mt-4 bg-[#e50914] hover:bg-[#b80710] disabled:opacity-50 text-white font-black py-3.5 rounded-xl transition-all shadow-xl text-sm flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 cursor-pointer"
+                  className="w-full mt-4 bg-[var(--accent-theme)] hover:bg-[var(--accent-hover)] disabled:opacity-50 text-white font-black py-3.5 rounded-xl transition-all shadow-xl text-sm flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 cursor-pointer"
                 >
                   <Sparkles size={18} />
                   <span>{isSubmitting ? "מחבר את הטלוויזיה..." : `חבר את הטלוויזיה לחשבון (${currentAccount.username})`}</span>
@@ -193,7 +193,7 @@ function PairContent() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="כתובת אימייל"
-                    className="w-full bg-black/60 border border-white/15 focus:border-[#e50914] rounded-xl pr-10 pl-4 py-2.5 text-sm text-white focus:outline-none transition-all placeholder:text-neutral-500"
+                    className="w-full bg-black/60 border border-white/15 focus:border-[var(--accent-theme)] rounded-xl pr-10 pl-4 py-2.5 text-sm text-white focus:outline-none transition-all placeholder:text-neutral-500"
                   />
                 </div>
 
@@ -206,14 +206,14 @@ function PairContent() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="שם משתמש (אופציונלי)"
-                    className="w-full bg-black/60 border border-white/15 focus:border-[#e50914] rounded-xl pr-10 pl-4 py-2.5 text-sm text-white focus:outline-none transition-all placeholder:text-neutral-500"
+                    className="w-full bg-black/60 border border-white/15 focus:border-[var(--accent-theme)] rounded-xl pr-10 pl-4 py-2.5 text-sm text-white focus:outline-none transition-all placeholder:text-neutral-500"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting || !code.trim()}
-                  className="w-full bg-[#e50914] hover:bg-[#b80710] disabled:opacity-50 text-white font-black py-3 rounded-xl transition-all shadow-xl text-sm flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 cursor-pointer mt-2"
+                  className="w-full bg-[var(--accent-theme)] hover:bg-[var(--accent-hover)] disabled:opacity-50 text-white font-black py-3 rounded-xl transition-all shadow-xl text-sm flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 cursor-pointer mt-2"
                 >
                   <Tv size={16} />
                   <span>{isSubmitting ? "מתחבר ומחבר..." : "התחבר ואשר חיבור לטלוויזיה"}</span>

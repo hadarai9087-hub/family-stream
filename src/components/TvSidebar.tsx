@@ -63,7 +63,7 @@ export const TvSidebar: React.FC<TvSidebarProps> = ({
             alt="HM Stream"
             width={40}
             height={40}
-            className="h-8 md:h-10 w-auto object-contain drop-shadow-[0_2px_10px_rgba(229,9,20,0.6)]"
+            className="h-8 md:h-10 w-auto object-contain drop-shadow-[0_2px_10px_rgba(var(--accent-rgb),0.6)]"
             priority
           />
         </button>
@@ -80,7 +80,7 @@ export const TvSidebar: React.FC<TvSidebarProps> = ({
                 onClick={() => onSelectTab(item.id)}
                 className={`flex items-center gap-4 px-3 py-3 rounded-xl transition-all w-full text-right tv-focusable cursor-pointer ${
                   isActive
-                    ? "bg-[#e50914] text-white font-bold shadow-[0_0_20px_rgba(229,9,20,0.6)]"
+                    ? "bg-[var(--accent-theme)] text-white font-bold shadow-[0_0_20px_rgba(var(--accent-rgb),0.6)]"
                     : "text-neutral-400 hover:text-white hover:bg-white/10"
                 }`}
                 title={item.label}
@@ -121,7 +121,7 @@ export const TvSidebar: React.FC<TvSidebarProps> = ({
 
         <button
           onClick={onLogout}
-          className="flex items-center gap-4 px-3 py-2.5 rounded-xl text-neutral-400 hover:text-[#e50914] hover:bg-white/10 transition-colors w-full text-right tv-focusable cursor-pointer"
+          className="flex items-center gap-4 px-3 py-2.5 rounded-xl text-neutral-400 hover:text-[var(--accent-theme)] hover:bg-white/10 transition-colors w-full text-right tv-focusable cursor-pointer"
           title="התנתק מהחשבון"
         >
           <LogOut size={20} className="flex-shrink-0" />

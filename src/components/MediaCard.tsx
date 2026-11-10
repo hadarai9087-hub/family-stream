@@ -44,7 +44,7 @@ export const MediaCard: React.FC<MediaCardProps> = ({
       tabIndex={0}
       role="button"
       aria-label={`צפה ב-${item.title}`}
-      className={`relative flex-shrink-0 transition-all duration-300 rounded-xl group select-none tv-focusable focus:scale-105 focus:ring-4 focus:ring-[#e50914] focus:outline-none cursor-pointer hover:scale-[1.03] hover:z-10 ${
+      className={`relative flex-shrink-0 transition-all duration-300 rounded-xl group select-none tv-focusable focus:scale-105 focus:ring-4 focus:ring-[var(--accent-theme)] focus:outline-none cursor-pointer hover:scale-[1.03] hover:z-10 ${
         isWide || progress ? "w-64 md:w-80 aspect-video" : "w-36 sm:w-44 md:w-52 aspect-[2/3]"
       }`}
       onClick={() => onPlay(item, progress)}
@@ -81,14 +81,14 @@ export const MediaCard: React.FC<MediaCardProps> = ({
               )}
               <div className="flex items-center justify-between text-[10px] text-neutral-400 mt-0.5">
                 <span>{progress.title}</span>
-                <span className="text-[#e50914] font-semibold">{remainingMinutes} דק' נותרו</span>
+                <span className="text-[var(--accent-theme)] font-semibold">{remainingMinutes} דק' נותרו</span>
               </div>
             </div>
 
             {/* Red Progress Line */}
             <div className="w-full h-1 bg-white/30 overflow-hidden">
               <div
-                className="h-full bg-[#e50914] transition-all duration-300"
+                className="h-full bg-[var(--accent-theme)] transition-all duration-300"
                 style={{ width: `${percentage}%` }}
               />
             </div>
@@ -148,7 +148,7 @@ export const MediaCard: React.FC<MediaCardProps> = ({
               e.stopPropagation();
               onRemoveProgress(item.id);
             }}
-            className="p-2 rounded-full bg-black/75 hover:bg-[#e50914] text-white border border-white/20 transition-all duration-200 hover:scale-110 active:scale-95 shadow-xl backdrop-blur-md cursor-pointer"
+            className="p-2 rounded-full bg-black/75 hover:bg-[var(--accent-theme)] text-white border border-white/20 transition-all duration-200 hover:scale-110 active:scale-95 shadow-xl backdrop-blur-md cursor-pointer"
             title="הסר מהמשך צפייה"
           >
             <Trash2 size={14} />

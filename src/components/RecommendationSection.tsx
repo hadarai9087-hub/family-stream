@@ -115,7 +115,7 @@ export const RecommendationSection: React.FC<RecommendationSectionProps> = ({
       <div className="px-4 md:px-12">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Sparkles size={18} className="text-[#e50914]" />
+            <Sparkles size={18} className="text-[var(--accent-theme)]" />
             <h3 className="text-sm font-semibold text-neutral-300">
               {isColdStart ? "התאם את העדפות הצפייה שלך" : "התאמה אישית לפי ז'אנרים"}
             </h3>
@@ -138,7 +138,7 @@ export const RecommendationSection: React.FC<RecommendationSectionProps> = ({
                 onClick={() => handleToggleGenre(g.id)}
                 className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 cursor-pointer select-none active:scale-95 ${
                   isSelected
-                    ? "bg-[#e50914] text-white shadow-[0_2px_12px_rgba(229,9,20,0.4)] border border-[#e50914]"
+                    ? "bg-[var(--accent-theme)] text-white shadow-[0_2px_12px_rgba(var(--accent-rgb),0.4)] border border-[var(--accent-theme)]"
                     : "bg-neutral-900/80 hover:bg-neutral-800 text-neutral-300 border border-white/10 hover:border-white/20"
                 }`}
               >

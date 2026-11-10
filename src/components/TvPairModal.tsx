@@ -57,7 +57,7 @@ export const TvPairModal: React.FC<TvPairModalProps> = ({ onClose, onPairApprove
         </button>
 
         {/* Icon & Title */}
-        <div className="w-14 h-14 rounded-2xl bg-[#e50914]/20 border border-[#e50914]/40 text-[#e50914] flex items-center justify-center mb-4">
+        <div className="w-14 h-14 rounded-2xl bg-[rgba(var(--accent-rgb),0.2)] border border-[rgba(var(--accent-rgb),0.4)] text-[var(--accent-theme)] flex items-center justify-center mb-4">
           <Smartphone size={28} />
         </div>
 
@@ -76,7 +76,7 @@ export const TvPairModal: React.FC<TvPairModalProps> = ({ onClose, onPairApprove
           </div>
         ) : isLoading || !session ? (
           <div className="py-16 flex flex-col items-center gap-3 text-neutral-400 text-sm">
-            <RefreshCw size={32} className="animate-spin text-[#e50914]" />
+            <RefreshCw size={32} className="animate-spin text-[var(--accent-theme)]" />
             <span>מייצר קוד זיווג מאובטח...</span>
           </div>
         ) : (
@@ -99,7 +99,7 @@ export const TvPairModal: React.FC<TvPairModalProps> = ({ onClose, onPairApprove
               <span className="text-xs uppercase text-neutral-400 tracking-wider font-semibold block mb-1">
                 או הזן קוד זיווג בטלפון:
               </span>
-              <div className="text-3xl md:text-4xl font-mono font-black tracking-widest text-[#e50914] bg-black/60 px-6 py-2.5 rounded-xl border border-white/10 select-all">
+              <div className="text-3xl md:text-4xl font-mono font-black tracking-widest text-[var(--accent-theme)] bg-black/60 px-6 py-2.5 rounded-xl border border-white/10 select-all">
                 {session.code}
               </div>
             </div>

@@ -13,10 +13,10 @@ export const supabase = isSupabaseConfigured
 
 // Default initial profiles
 export const DEFAULT_PROFILES: UserProfile[] = [
-  { id: "p1", name: "אבא", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80", is_kids: false },
-  { id: "p2", name: "אמא", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&auto=format&fit=crop&q=80", is_kids: false },
-  { id: "p3", name: "ילדים", avatar: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=200&auto=format&fit=crop&q=80", is_kids: true },
-  { id: "p4", name: "אורח", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80", is_kids: false },
+  { id: "p1", name: "אבא", avatar: "/avatars/rick.png", is_kids: false },
+  { id: "p2", name: "אמא", avatar: "/avatars/lucy.png", is_kids: false },
+  { id: "p3", name: "ילדים", avatar: "/avatars/aang.png", is_kids: true },
+  { id: "p4", name: "אורח", avatar: "/avatars/david.png", is_kids: false },
 ];
 
 interface DbWatchProgressRow {

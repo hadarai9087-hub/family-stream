@@ -70,8 +70,8 @@ export function resolveStreamSources(options: StreamResolutionOptions): StreamSo
       sandboxed: true,
       quality: "4K / 1080p FHD",
       url: isMovie
-        ? `https://vidlink.pro/movie/${tmdbId}?primaryColor=e50914&autoplay=true${startParam}${subParam}`
-        : `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?primaryColor=e50914&autoplay=true${startParam}${subParam}`,
+        ? `https://vidlink.pro/movie/${tmdbId}?primaryColor=e50914&autoplay=true${startParam}`
+        : `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?primaryColor=e50914&autoplay=true${startParam}`,
     },
     {
       id: "cinecat-engine",

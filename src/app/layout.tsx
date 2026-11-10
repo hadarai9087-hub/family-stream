@@ -51,13 +51,18 @@ export default function RootLayout({
       className={`${assistant.variable} font-sans h-full bg-[#141414] text-white antialiased`}
     >
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=localStorage.getItem("hm_app_settings");if(s){var p=JSON.parse(s);if(p&&p.accentColor){var c=[{hex:"#e50914",hover:"#b80710",rgb:"229, 9, 20"},{hex:"#0070f3",hover:"#0058c6",rgb:"0, 112, 243"},{hex:"#8b5cf6",hover:"#7c3aed",rgb:"139, 92, 246"},{hex:"#10b981",hover:"#059669",rgb:"16, 185, 129"},{hex:"#f59e0b",hover:"#d97706",rgb:"245, 158, 11"},{hex:"#ec4899",hover:"#db2777",rgb:"236, 72, 153"}];var m=c.find(function(x){return x.hex.toLowerCase()===p.accentColor.toLowerCase()})||c[0];document.documentElement.style.setProperty("--accent-theme",m.hex);document.documentElement.style.setProperty("--accent-hover",m.hover);document.documentElement.style.setProperty("--accent-rgb",m.rgb);}}}catch(e){}})();`,
+          }}
+        />
         <link rel="apple-touch-icon" sizes="180x180" href="/logo.png" />
         <link rel="apple-touch-icon" href="/logo.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="HM STREAM" />
       </head>
-      <body className="min-h-full flex flex-col bg-[#141414] text-white selection:bg-[#e50914] selection:text-white antialiased">
+      <body className="min-h-full flex flex-col bg-[#141414] text-white selection:bg-[var(--accent-theme)] selection:text-white antialiased">
         {children}
       </body>
     </html>

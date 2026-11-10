@@ -60,7 +60,7 @@ export const SubtitleControls: React.FC<SubtitleControlsProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-white/10">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-[#e50914]/20 text-[#e50914]">
+            <div className="p-2 rounded-xl bg-[rgba(var(--accent-rgb),0.2)] text-[var(--accent-theme)]">
               <Subtitles size={20} />
             </div>
             <div>
@@ -80,7 +80,7 @@ export const SubtitleControls: React.FC<SubtitleControlsProps> = ({
         {/* Track Selection List */}
         <div className="flex flex-col gap-2">
           <span className="text-xs font-semibold text-neutral-300 flex items-center gap-1.5">
-            <Languages size={14} className="text-[#e50914]" />
+            <Languages size={14} className="text-[var(--accent-theme)]" />
             <span>רצועת כתוביות:</span>
           </span>
 
@@ -90,7 +90,7 @@ export const SubtitleControls: React.FC<SubtitleControlsProps> = ({
               onClick={() => onSelectTrack(null)}
               className={`w-full text-right px-4 py-2.5 rounded-xl text-xs flex items-center justify-between transition-all cursor-pointer tv-focusable ${
                 selectedTrackId === null
-                  ? "bg-[#e50914] text-white font-bold shadow-lg"
+                  ? "bg-[var(--accent-theme)] text-white font-bold shadow-lg"
                   : "bg-white/5 hover:bg-white/10 text-neutral-300"
               }`}
             >
@@ -107,7 +107,7 @@ export const SubtitleControls: React.FC<SubtitleControlsProps> = ({
                   onClick={() => onSelectTrack(track.id)}
                   className={`w-full text-right px-4 py-2.5 rounded-xl text-xs flex items-center justify-between transition-all cursor-pointer tv-focusable ${
                     isSelected
-                      ? "bg-[#e50914] text-white font-bold shadow-lg"
+                      ? "bg-[var(--accent-theme)] text-white font-bold shadow-lg"
                       : "bg-white/5 hover:bg-white/10 text-neutral-300"
                   }`}
                 >
@@ -139,7 +139,7 @@ export const SubtitleControls: React.FC<SubtitleControlsProps> = ({
                 className={`text-xs font-mono font-bold px-2 py-0.5 rounded ${
                   offsetMs === 0
                     ? "text-neutral-400 bg-white/5"
-                    : "text-[#e50914] bg-[#e50914]/15"
+                    : "text-[var(--accent-theme)] bg-[rgba(var(--accent-rgb),0.15)]"
                 }`}
               >
                 {formatOffset(offsetMs)}

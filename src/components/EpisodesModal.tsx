@@ -127,7 +127,7 @@ export const EpisodesModal: React.FC<EpisodesModalProps> = ({
                   <select
                     value={selectedSeason}
                     onChange={(e) => setSelectedSeason(Number(e.target.value))}
-                    className="bg-[#242424] text-white border border-white/20 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#e50914] tv-focusable"
+                    className="bg-[#242424] text-white border border-white/20 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[var(--accent-theme)] tv-focusable"
                   >
                     {Array.from({ length: totalSeasons }, (_, i) => i + 1).map((seasonNum) => (
                       <option key={seasonNum} value={seasonNum}>
@@ -177,7 +177,7 @@ export const EpisodesModal: React.FC<EpisodesModalProps> = ({
                         {/* Episode Meta & Overview */}
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
-                            <h3 className="text-base font-bold text-white group-hover:text-[#e50914] transition-colors">
+                            <h3 className="text-base font-bold text-white group-hover:text-[var(--accent-theme)] transition-colors">
                               {ep.episode_number}. {ep.name}
                             </h3>
                             {ep.runtime && (

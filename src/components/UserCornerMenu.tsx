@@ -67,7 +67,7 @@ export const UserCornerMenu: React.FC<UserCornerMenuProps> = ({
                 }}
                 className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs text-neutral-300 hover:text-white hover:bg-white/10 transition-colors w-full text-right cursor-pointer"
               >
-                <Sliders size={15} className="text-[#e50914]" />
+                <Sliders size={15} className="text-[var(--accent-theme)]" />
                 <span>הגדרות, כתוביות וצבע</span>
               </button>
 
@@ -97,7 +97,7 @@ export const UserCornerMenu: React.FC<UserCornerMenuProps> = ({
                   setIsOpen(false);
                   onLogout();
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs text-[#e50914] hover:bg-white/10 transition-colors font-semibold cursor-pointer text-right"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs text-[var(--accent-theme)] hover:bg-white/10 transition-colors font-semibold cursor-pointer text-right"
               >
                 <LogOut size={15} />
                 <span>התנתק מהחשבון</span>

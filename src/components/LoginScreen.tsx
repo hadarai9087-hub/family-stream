@@ -76,12 +76,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
             alt="HM Logo"
             width={40}
             height={40}
-            className="h-8 md:h-10 w-auto object-contain drop-shadow-[0_2px_12px_rgba(229,9,20,0.5)]"
+            className="h-8 md:h-10 w-auto object-contain drop-shadow-[0_2px_12px_rgba(var(--accent-rgb),0.5)]"
             priority
           />
         </div>
         <span className="text-white font-black text-xl tracking-wider">
-          HM<span className="text-[#e50914]">STREAM</span>
+          HM<span className="text-[var(--accent-theme)]">STREAM</span>
         </span>
       </div>
 
@@ -96,7 +96,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 alt="HM Stream"
                 width={72}
                 height={72}
-                className="h-14 w-auto object-contain drop-shadow-[0_2px_12px_rgba(229,9,20,0.6)]"
+                className="h-14 w-auto object-contain drop-shadow-[0_2px_12px_rgba(var(--accent-rgb),0.6)]"
                 priority
               />
             </div>
@@ -120,7 +120,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 <div
                   key={u.id}
                   onClick={() => handleSavedUserClick(u)}
-                  className="group flex items-center gap-2 bg-[#202023] hover:bg-[#28282c] border border-white/10 hover:border-[#e50914]/50 rounded-xl px-3 py-1.5 cursor-pointer transition-all active:scale-95"
+                  className="group flex items-center gap-2 bg-[#202023] hover:bg-[#28282c] border border-white/10 hover:border-[rgba(var(--accent-rgb),0.5)] rounded-xl px-3 py-1.5 cursor-pointer transition-all active:scale-95"
                 >
                   <Image
                     src={u.avatar}
@@ -162,7 +162,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-[#202024] hover:bg-[#26262a] focus:bg-[#26262a] border border-white/10 focus:border-[#e50914] text-white placeholder-neutral-500 text-sm rounded-xl py-3 pr-10 pl-4 focus:outline-none transition-all text-right"
+                className="w-full bg-[#202024] hover:bg-[#26262a] focus:bg-[#26262a] border border-white/10 focus:border-[var(--accent-theme)] text-white placeholder-neutral-500 text-sm rounded-xl py-3 pr-10 pl-4 focus:outline-none transition-all text-right"
               />
               <Mail size={18} className="absolute right-3.5 text-neutral-400 pointer-events-none" />
             </div>
@@ -178,7 +178,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 placeholder="לדוגמה: הדר מזרחי"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full bg-[#202024] hover:bg-[#26262a] focus:bg-[#26262a] border border-white/10 focus:border-[#e50914] text-white placeholder-neutral-500 text-sm rounded-xl py-3 pr-10 pl-4 focus:outline-none transition-all text-right"
+                className="w-full bg-[#202024] hover:bg-[#26262a] focus:bg-[#26262a] border border-white/10 focus:border-[var(--accent-theme)] text-white placeholder-neutral-500 text-sm rounded-xl py-3 pr-10 pl-4 focus:outline-none transition-all text-right"
               />
               <User size={18} className="absolute right-3.5 text-neutral-400 pointer-events-none" />
             </div>
@@ -187,7 +187,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-[#e50914] hover:bg-[#c11119] text-white font-bold py-3.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(229,9,20,0.4)] text-sm mt-3 disabled:opacity-50 active:scale-98 cursor-pointer flex items-center justify-center gap-2"
+            className="w-full bg-[var(--accent-theme)] hover:bg-[var(--accent-hover)] text-white font-bold py-3.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(var(--accent-rgb),0.4)] text-sm mt-3 disabled:opacity-50 active:scale-98 cursor-pointer flex items-center justify-center gap-2"
           >
             {isLoading ? "מתחבר..." : "כניסה מיידית למערכת"}
           </button>
@@ -199,7 +199,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
             href="/download"
             className="text-xs text-neutral-400 hover:text-white flex items-center justify-center gap-1.5 transition-colors py-1 cursor-pointer"
           >
-            <Tv size={14} className="text-[#e50914]" />
+            <Tv size={14} className="text-[var(--accent-theme)]" />
             <span>רוצה לצפות בטלוויזיה? הורד את אפליקציית הטלוויזיה (APK)</span>
           </Link>
         </div>

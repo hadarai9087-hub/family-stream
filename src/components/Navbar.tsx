@@ -59,12 +59,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               alt="HM Stream"
               width={40}
               height={40}
-              className="h-8 md:h-10 w-auto object-contain drop-shadow-[0_2px_10px_rgba(229,9,20,0.6)]"
+              className="h-8 md:h-10 w-auto object-contain drop-shadow-[0_2px_10px_rgba(var(--accent-rgb),0.6)]"
               priority
             />
           </div>
           <span className="text-white font-black text-xl md:text-2xl tracking-wider hidden sm:inline">
-            HM<span className="text-[#e50914]">STREAM</span>
+            HM<span className="text-[var(--accent-theme)]">STREAM</span>
           </span>
         </button>
 
@@ -75,7 +75,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => onSelectTab(item.id)}
               className={`transition-colors duration-200 tv-focusable px-1 py-1 cursor-pointer ${
                 activeTab === item.id
-                  ? "text-white font-bold border-b-2 border-[#e50914]"
+                  ? "text-white font-bold border-b-2 border-[var(--accent-theme)]"
                   : "text-[#b3b3b3] hover:text-white"
               }`}
             >
@@ -86,7 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             href="/download"
             className="text-xs text-neutral-400 hover:text-white transition-colors flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10"
           >
-            <Tv size={14} className="text-[#e50914]" />
+            <Tv size={14} className="text-[var(--accent-theme)]" />
             <span>אפליקציה לטלוויזיה</span>
           </Link>
         </nav>

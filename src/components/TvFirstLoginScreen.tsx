@@ -84,13 +84,13 @@ export const TvFirstLoginScreen: React.FC<TvFirstLoginScreenProps> = ({ onLoginS
             alt="HM Logo"
             width={48}
             height={48}
-            className="h-9 md:h-12 w-auto object-contain drop-shadow-[0_2px_12px_rgba(229,9,20,0.6)]"
+            className="h-9 md:h-12 w-auto object-contain drop-shadow-[0_2px_12px_rgba(var(--accent-rgb),0.6)]"
           />
         </div>
         <span className="text-white font-black text-2xl md:text-4xl tracking-wider">
-          HM<span className="text-[#e50914]">STREAM</span>
+          HM<span className="text-[var(--accent-theme)]">STREAM</span>
         </span>
-        <span className="bg-[#e50914]/20 border border-[#e50914]/40 text-[#e50914] text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wider">
+        <span className="bg-[rgba(var(--accent-rgb),0.2)] border border-[rgba(var(--accent-rgb),0.4)] text-[var(--accent-theme)] text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wider">
           TV EDITION
         </span>
       </div>
@@ -131,7 +131,7 @@ export const TvFirstLoginScreen: React.FC<TvFirstLoginScreenProps> = ({ onLoginS
                 placeholder="כתובת אימייל"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-black/60 border border-white/20 text-white pr-10 pl-3 py-3 rounded-xl text-right text-sm focus:outline-none focus:border-[#e50914]"
+                className="w-full bg-black/60 border border-white/20 text-white pr-10 pl-3 py-3 rounded-xl text-right text-sm focus:outline-none focus:border-[var(--accent-theme)]"
               />
             </div>
 
@@ -144,13 +144,13 @@ export const TvFirstLoginScreen: React.FC<TvFirstLoginScreenProps> = ({ onLoginS
                 placeholder="שם משתמש (אופציונלי)"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full bg-black/60 border border-white/20 text-white pr-10 pl-3 py-3 rounded-xl text-right text-sm focus:outline-none focus:border-[#e50914]"
+                className="w-full bg-black/60 border border-white/20 text-white pr-10 pl-3 py-3 rounded-xl text-right text-sm focus:outline-none focus:border-[var(--accent-theme)]"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full bg-[#e50914] text-white font-bold py-3.5 rounded-xl text-sm hover:bg-[#b80710] transition-colors shadow-lg cursor-pointer"
+              className="w-full bg-[var(--accent-theme)] text-white font-bold py-3.5 rounded-xl text-sm hover:bg-[var(--accent-hover)] transition-colors shadow-lg cursor-pointer"
             >
               התחבר
             </button>
@@ -170,7 +170,7 @@ export const TvFirstLoginScreen: React.FC<TvFirstLoginScreenProps> = ({ onLoginS
         <div className="relative z-20 w-full max-w-5xl flex flex-col md:flex-row items-center justify-between gap-10 md:gap-16">
           {/* Left/Right Text Column */}
           <div className="flex-1 text-right flex flex-col items-start order-2 md:order-1">
-            <div className="flex items-center gap-2 text-[#e50914] font-bold text-sm md:text-base mb-3">
+            <div className="flex items-center gap-2 text-[var(--accent-theme)] font-bold text-sm md:text-base mb-3">
               <Tv size={22} />
               <span>התחברות מהירה ללא הקלדה בשלט</span>
             </div>
@@ -181,7 +181,7 @@ export const TvFirstLoginScreen: React.FC<TvFirstLoginScreenProps> = ({ onLoginS
 
             <div className="space-y-4 text-neutral-300 text-base md:text-xl font-medium mb-8">
               <div className="flex items-center gap-4">
-                <span className="w-9 h-9 rounded-full bg-[#e50914] text-white font-bold flex items-center justify-center text-sm flex-shrink-0 shadow-lg">
+                <span className="w-9 h-9 rounded-full bg-[var(--accent-theme)] text-white font-bold flex items-center justify-center text-sm flex-shrink-0 shadow-lg">
                   1
                 </span>
                 <span>פתח את המצלמה בטלפון וסרוק את קוד ה-QR.</span>
@@ -208,7 +208,7 @@ export const TvFirstLoginScreen: React.FC<TvFirstLoginScreenProps> = ({ onLoginS
                 <span className="text-xs md:text-sm text-neutral-400 block mb-2 font-medium">
                   או גלוש בנייד ל- <strong className="text-white font-mono">/pair</strong> והזן קוד:
                 </span>
-                <div className="text-3xl md:text-5xl font-mono font-black tracking-widest text-[#e50914] bg-black/80 px-6 py-3 rounded-xl border border-white/15 text-center shadow-inner">
+                <div className="text-3xl md:text-5xl font-mono font-black tracking-widest text-[var(--accent-theme)] bg-black/80 px-6 py-3 rounded-xl border border-white/15 text-center shadow-inner">
                   {session.code}
                 </div>
               </div>
@@ -237,10 +237,10 @@ export const TvFirstLoginScreen: React.FC<TvFirstLoginScreenProps> = ({ onLoginS
 
           {/* Large QR Code Box */}
           <div className="flex flex-col items-center justify-center order-1 md:order-2">
-            <div className="relative group p-4 md:p-6 bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.8),_0_0_50px_rgba(229,9,20,0.3)] transition-transform duration-300 hover:scale-105">
+            <div className="relative group p-4 md:p-6 bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.8),_0_0_50px_rgba(var(--accent-rgb),0.3)] transition-transform duration-300 hover:scale-105">
               {isLoading || !session ? (
                 <div className="w-64 h-64 md:w-80 md:h-80 flex flex-col items-center justify-center text-neutral-600">
-                  <RefreshCw size={40} className="animate-spin text-[#e50914] mb-3" />
+                  <RefreshCw size={40} className="animate-spin text-[var(--accent-theme)] mb-3" />
                   <span className="text-sm font-semibold">מייצר ברקוד מאובטח...</span>
                 </div>
               ) : (
@@ -257,7 +257,7 @@ export const TvFirstLoginScreen: React.FC<TvFirstLoginScreenProps> = ({ onLoginS
             </div>
 
             <div className="mt-4 flex items-center gap-2 text-xs md:text-sm text-neutral-400">
-              <Smartphone size={16} className="text-[#e50914]" />
+              <Smartphone size={16} className="text-[var(--accent-theme)]" />
               <span>סריקה במצלמת הטלפון מחברת את הטלוויזיה מיידית</span>
             </div>
           </div>

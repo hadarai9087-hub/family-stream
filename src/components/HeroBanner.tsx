@@ -49,7 +49,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       <div className="relative z-20 h-full flex flex-col justify-end pb-20 md:pb-28 px-4 md:px-12 max-w-2xl lg:max-w-3xl">
         {/* Badges: Top 10 / Netflix Original / Rating */}
         <div className="flex items-center gap-3 mb-3 text-xs md:text-sm font-semibold text-neutral-300">
-          <span className="bg-[#e50914] text-white px-2 py-0.5 rounded font-black tracking-wider uppercase text-xs">
+          <span className="bg-[var(--accent-theme)] text-white px-2 py-0.5 rounded font-black tracking-wider uppercase text-xs">
             TOP 10
           </span>
           <span className="text-[#46d369] font-bold">98% התאמה</span>

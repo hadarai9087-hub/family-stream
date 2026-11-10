@@ -2,6 +2,8 @@
 
 @theme {
   --font-sans: var(--font-assistant), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --color-accent: var(--accent-theme);
+  --color-accent-hover: var(--accent-hover);
 }
 
 :root {
@@ -10,8 +12,11 @@
   --surface-elevated: #242424;
   --foreground: #ffffff;
   --foreground-muted: #a3a3a3;
-  --netflix-red: #e50914;
-  --netflix-red-hover: #b80710;
+  --accent-theme: #e50914;
+  --accent-hover: #b80710;
+  --accent-rgb: 229, 9, 20;
+  --netflix-red: var(--accent-theme);
+  --netflix-red-hover: var(--accent-hover);
 }
 
 *,
@@ -81,7 +86,7 @@ input:-webkit-autofill:active {
   z-index: 40;
   outline: 3px solid #ffffff;
   outline-offset: 4px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(229, 9, 20, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(var(--accent-rgb), 0.5);
 }
 
 /* Smooth gradient overlays for hero and rows */

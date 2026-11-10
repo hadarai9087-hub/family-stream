@@ -38,7 +38,7 @@ export default function DownloadPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0e0e10] text-white selection:bg-[#e50914] selection:text-white" dir="rtl">
+    <div className="min-h-screen bg-[#0e0e10] text-white selection:bg-[var(--accent-theme)] selection:text-white" dir="rtl">
       {/* Background Ambient Glow */}
       <div className="fixed inset-0 pointer-events-none opacity-20 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-red-800 via-neutral-950 to-black" />
 
@@ -51,11 +51,11 @@ export default function DownloadPage() {
               alt="HM Logo"
               width={40}
               height={40}
-              className="h-8 w-auto object-contain drop-shadow-[0_2px_10px_rgba(229,9,20,0.5)]"
+              className="h-8 w-auto object-contain drop-shadow-[0_2px_10px_rgba(var(--accent-rgb),0.5)]"
             />
           </div>
           <span className="text-white font-black text-xl tracking-wider">
-            HM<span className="text-[#e50914]">STREAM</span>
+            HM<span className="text-[var(--accent-theme)]">STREAM</span>
           </span>
         </Link>
 
@@ -72,7 +72,7 @@ export default function DownloadPage() {
       <main className="relative z-10 max-w-5xl mx-auto px-6 pt-6 pb-24">
         <div className="text-center max-w-3xl mx-auto mb-14">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-950/60 border border-red-800/40 text-red-300 text-xs font-semibold mb-4 animate-in fade-in">
-            <Flame size={14} className="text-[#e50914]" />
+            <Flame size={14} className="text-[var(--accent-theme)]" />
             <span>גרסת טלוויזיה ייעודית (Android TV & FireStick)</span>
           </div>
 
@@ -95,7 +95,7 @@ export default function DownloadPage() {
             <div className="absolute top-0 left-0 w-32 h-32 bg-red-600/10 blur-3xl pointer-events-none" />
 
             <div>
-              <div className="w-14 h-14 rounded-2xl bg-[#e50914]/20 border border-[#e50914]/30 text-[#e50914] flex items-center justify-center mb-6">
+              <div className="w-14 h-14 rounded-2xl bg-[rgba(var(--accent-rgb),0.2)] border border-[rgba(var(--accent-rgb),0.3)] text-[var(--accent-theme)] flex items-center justify-center mb-6">
                 <Tv size={28} />
               </div>
 
@@ -123,7 +123,7 @@ export default function DownloadPage() {
             <div>
               <button
                 onClick={handleDownloadApk}
-                className="w-full bg-[#e50914] hover:bg-[#b80710] text-white font-black py-4 px-6 rounded-2xl transition-all shadow-xl hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3 text-base cursor-pointer"
+                className="w-full bg-[var(--accent-theme)] hover:bg-[var(--accent-hover)] text-white font-black py-4 px-6 rounded-2xl transition-all shadow-xl hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3 text-base cursor-pointer"
               >
                 <Download size={22} />
                 <span>הורד קובץ התקנה לטלוויזיה (APK)</span>
@@ -180,13 +180,13 @@ export default function DownloadPage() {
         {/* Installation Instructions (How to Install on FireStick / Android TV) */}
         <div className="bg-[#121214] border border-white/10 rounded-3xl p-8 md:p-10 shadow-2xl">
           <div className="flex items-center gap-3 mb-6">
-            <HelpCircle className="text-[#e50914]" size={24} />
+            <HelpCircle className="text-[var(--accent-theme)]" size={24} />
             <h3 className="text-xl md:text-2xl font-black text-white">מדריך התקנה פשוט ב-3 שלבים:</h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-black/40 border border-white/5 rounded-2xl p-5">
-              <div className="w-8 h-8 rounded-full bg-[#e50914] text-white font-black text-sm flex items-center justify-center mb-3">
+              <div className="w-8 h-8 rounded-full bg-[var(--accent-theme)] text-white font-black text-sm flex items-center justify-center mb-3">
                 1
               </div>
               <h4 className="font-bold text-base text-white mb-1.5">התקן אפליקציית Downloader</h4>
@@ -196,20 +196,20 @@ export default function DownloadPage() {
             </div>
 
             <div className="bg-black/40 border border-white/5 rounded-2xl p-5">
-              <div className="w-8 h-8 rounded-full bg-[#e50914] text-white font-black text-sm flex items-center justify-center mb-3">
+              <div className="w-8 h-8 rounded-full bg-[var(--accent-theme)] text-white font-black text-sm flex items-center justify-center mb-3">
                 2
               </div>
               <h4 className="font-bold text-base text-white mb-1.5">הזן את קישור ההורדה</h4>
               <p className="text-xs text-neutral-400 leading-relaxed">
                 באפליקציית Downloader הקלד את הכתובת של אתר זה: <br />
-                <code className="text-[#e50914] bg-black/80 px-2 py-0.5 rounded text-[11px] font-mono mt-1 inline-block">
+                <code className="text-[var(--accent-theme)] bg-black/80 px-2 py-0.5 rounded text-[11px] font-mono mt-1 inline-block">
                   /download
                 </code>
               </p>
             </div>
 
             <div className="bg-black/40 border border-white/5 rounded-2xl p-5">
-              <div className="w-8 h-8 rounded-full bg-[#e50914] text-white font-black text-sm flex items-center justify-center mb-3">
+              <div className="w-8 h-8 rounded-full bg-[var(--accent-theme)] text-white font-black text-sm flex items-center justify-center mb-3">
                 3
               </div>
               <h4 className="font-bold text-base text-white mb-1.5">התחבר ב-QR מהטלפון</h4>

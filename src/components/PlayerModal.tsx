@@ -18,6 +18,7 @@ import { MediaItem, StreamSource, SubtitleTrack } from "@/types";
 import { resolveStreamSources } from "@/lib/streamResolvers";
 import { storageManager } from "@/lib/supabase";
 import { getHebrewSubtitles, parseWebVttCues, SubtitleCue } from "@/lib/subtitles";
+import { resolveIntroTiming, IntroTimingResult } from "@/lib/introTimings";
 import { SubtitleControls } from "./SubtitleControls";
 
 interface PlayerModalProps {
@@ -85,12 +86,23 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
     currentTimeRef.current = currentTime;
   }, [currentTime]);
 
+  // Stream Health & Playback Verification Watchdog
+  const playbackVerifiedRef = useRef(false);
+  const streamHealthTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   // Listen for embed postMessage timeupdate & player events (R3.04)
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       try {
         const data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
-        if (data && (data.type === "PLAYER_EVENT" || data.event === "timeupdate")) {
+        if (data && (data.type === "PLAYER_EVENT" || data.event === "timeupdate" || data.event === "playing")) {
+          playbackVerifiedRef.current = true;
+          if (streamHealthTimerRef.current) {
+            clearTimeout(streamHealthTimerRef.current);
+            streamHealthTimerRef.current = null;
+          }
+          setServerStatus("ready");
+
           const t = data.currentTime || data.data?.currentTime || data.time;
           if (typeof t === "number" && !isNaN(t)) {
             const rounded = Math.floor(t);
@@ -135,10 +147,24 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
     [profileId, item, seasonNumber, episodeNumber, episodeName, duration]
   );
 
+  // Intro Timings Detection (TheIntroDB / AniSkip / Standard TV)
+  const [introData, setIntroData] = useState<IntroTimingResult>({ start: 15, end: 95, source: "standard" });
+
+  useEffect(() => {
+    if (item.media_type === "tv") {
+      resolveIntroTiming(item.tmdb_id || item.id, seasonNumber, episodeNumber).then((res) => {
+        setIntroData(res);
+      });
+    }
+  }, [item, seasonNumber, episodeNumber]);
+
   // Skip Intro State (Aether & Netflix Style - R4)
   const [hasSkippedIntro, setHasSkippedIntro] = useState(false);
   const isIntroWindow =
-    item.media_type === "tv" && currentTime >= 5 && currentTime <= 95 && !hasSkippedIntro;
+    item.media_type === "tv" &&
+    currentTime >= 5 &&
+    currentTime <= introData.end &&
+    !hasSkippedIntro;
 
   // Reset skip flag when rewinding back before intro window (R4.05)
   useEffect(() => {
@@ -149,7 +175,7 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
 
   const handleSkipIntro = useCallback(() => {
     setHasSkippedIntro(true);
-    const targetTime = currentTimeRef.current + 85;
+    const targetTime = introData.end > currentTimeRef.current ? introData.end : currentTimeRef.current + 85;
     setCurrentTime(targetTime);
     currentTimeRef.current = targetTime;
     setStatusMessage("דילגת על הפתיח (+85 שניות)");
@@ -167,7 +193,20 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
         win.postMessage(JSON.stringify({ event: "seek", time: targetTime }), "*");
       }
     } catch {}
-  }, [saveProgress]);
+
+    // Direct Universal Iframe Seek (Jump to startAt)
+    try {
+      if (iframeRef.current) {
+        const cur = iframeRef.current.src || currentSource?.url || "";
+        if (cur) {
+          const u = new URL(cur);
+          u.searchParams.set("startAt", targetTime.toString());
+          u.searchParams.set("start", targetTime.toString());
+          iframeRef.current.src = u.toString();
+        }
+      }
+    } catch {}
+  }, [saveProgress, currentSource, introData]);
 
   // Auto-skip Intro if enabled in user settings (like Aether)
   useEffect(() => {
@@ -195,8 +234,25 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
     }).then((tracks) => {
       if (!isMounted) return;
       setSubtitles(tracks);
-      // Keep overlay null by default to avoid duplicate overlapping subtitles with native player CC
-      setSelectedTrackId(null);
+      // Auto-activate Hebrew subtitle track by default
+      if (tracks.length > 0) {
+        let preferredLang = "he";
+        try {
+          const saved = localStorage.getItem("hm_app_settings");
+          if (saved) {
+            preferredLang = JSON.parse(saved).preferredSubtitleLang || "he";
+          }
+        } catch {}
+
+        const matchedTrack =
+          tracks.find((t) => t.language?.toLowerCase().startsWith(preferredLang)) ||
+          tracks.find((t) => t.language === "he" || t.label?.includes("עברית")) ||
+          tracks[0];
+
+        setSelectedTrackId(matchedTrack ? matchedTrack.id : tracks[0].id);
+      } else {
+        setSelectedTrackId(null);
+      }
     });
 
     return () => {
@@ -293,8 +349,10 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
   useEffect(() => {
     if (!currentSource) return;
 
+    playbackVerifiedRef.current = false;
     if (statusFadeTimerRef.current) clearTimeout(statusFadeTimerRef.current);
     if (watchdogTimerRef.current) clearTimeout(watchdogTimerRef.current);
+    if (streamHealthTimerRef.current) clearTimeout(streamHealthTimerRef.current);
 
     setServerStatus("loading");
     setStatusVisible(true);
@@ -302,7 +360,7 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
       `מתחבר לשרת (${selectedSourceIndex + 1}/${sources.length}): ${currentSource.name}...`
     );
 
-    // Arm the 6.5s watchdog fallback timer
+    // Arm the 6.5s watchdog fallback timer (checks if initial HTTP connection succeeds)
     watchdogTimerRef.current = setTimeout(() => {
       advanceToNextServer("זמן תגובה חרג מהמותר (6.5 שניות)");
     }, WATCHDOG_TIMEOUT_MS);
@@ -312,24 +370,31 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
         clearTimeout(watchdogTimerRef.current);
         watchdogTimerRef.current = null;
       }
+      if (streamHealthTimerRef.current) {
+        clearTimeout(streamHealthTimerRef.current);
+        streamHealthTimerRef.current = null;
+      }
     };
   }, [selectedSourceIndex, currentSource, sources.length, advanceToNextServer]);
 
-  // Iframe onLoad Handler: Disarm watchdog timer and mark ready
+  // Iframe onLoad Handler: Checks if stream actually broadcasts; auto-switches if dead
   const handleIframeLoad = () => {
     if (watchdogTimerRef.current) {
       clearTimeout(watchdogTimerRef.current);
       watchdogTimerRef.current = null;
     }
 
-    setServerStatus("ready");
-    setStatusMessage(`מחובר: ${currentSource?.name || "שרת הזרמה"}`);
+    setServerStatus("loading");
+    setStatusMessage(`נטען: ${currentSource?.name || "שרת הזרמה"} (מאמת שידור...)`);
     setStatusVisible(true);
 
-    if (statusFadeTimerRef.current) clearTimeout(statusFadeTimerRef.current);
-    statusFadeTimerRef.current = setTimeout(() => {
-      setStatusVisible(false);
-    }, 2500);
+    if (streamHealthTimerRef.current) clearTimeout(streamHealthTimerRef.current);
+    // 7.5s Stream Broadcast Watchdog: If the player is blank or broken, auto-switch to next server!
+    streamHealthTimerRef.current = setTimeout(() => {
+      if (!playbackVerifiedRef.current) {
+        advanceToNextServer("השרת לא החל בשידור (מעבר אוטומטי לשרת הבא)");
+      }
+    }, 7500);
   };
 
   // Iframe onError Handler
@@ -337,6 +402,10 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
     if (watchdogTimerRef.current) {
       clearTimeout(watchdogTimerRef.current);
       watchdogTimerRef.current = null;
+    }
+    if (streamHealthTimerRef.current) {
+      clearTimeout(streamHealthTimerRef.current);
+      streamHealthTimerRef.current = null;
     }
     advanceToNextServer("שגיאת טעינה בשרת");
   };

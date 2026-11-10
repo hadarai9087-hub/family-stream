@@ -60,11 +60,11 @@ export function resolveStreamSources(options: StreamResolutionOptions): StreamSo
 
   const sources: StreamSource[] = [
     // -------------------------------------------------------------
-    // Tier 1: Ultra-Fast FHD / 4K Primary Sources (Sub-400ms latency)
+    // Tier 1: Dedicated Clean Servers & High-Performance Engines
     // -------------------------------------------------------------
     {
       id: "vidlink-pro",
-      name: "VidLink Pro (מומלץ ומהיר FHD)",
+      name: "VidLink Pro (שרת ייעודי FHD / 4K)",
       type: "embed",
       tier: 1,
       sandboxed: true,
@@ -74,36 +74,32 @@ export function resolveStreamSources(options: StreamResolutionOptions): StreamSo
         : `https://vidlink.pro/tv/${tmdbId}/${season}/${episode}?primaryColor=e50914&autoplay=true${startParam}`,
     },
     {
-      id: "cinecat-engine",
-      name: "Cinecat Engine (רב-שרת מהיר)",
+      id: "pressplayx",
+      name: "PressPlay (שרת ייעודי מהיר)",
       type: "embed",
       tier: 1,
       sandboxed: true,
       quality: "1080p FHD",
       url: isMovie
-        ? `https://beta.cinecat.eu/media/tmdb-movie-${tmdbId}${startQuery}`
-        : `https://beta.cinecat.eu/media/tmdb-tv-${tmdbId}/${season}/${episode}${startQuery}`,
+        ? `https://moviesapi.to/movie/${tmdbId}?theme=e50914${startParam}`
+        : `https://moviesapi.to/tv/${tmdbId}-${season}-${episode}?theme=e50914${startParam}`,
     },
     {
-      id: "atlantic-server",
-      name: "Atlantic Server (מהיר ויציב)",
+      id: "streamingunity",
+      name: "StreamingUnity (שרת ייעודי ישיר)",
       type: "embed",
       tier: 1,
       sandboxed: true,
       quality: "1080p HD",
       url: isMovie
-        ? `https://atlantic.st/watch-movie/${tmdbId}${startQuery}`
-        : `https://atlantic.st/watch-tv/${tmdbId}?season=${season}&episode=${episode}${startParam}`,
+        ? `https://streamingunity.com/movie/${tmdbId}${startQuery}`
+        : `https://streamingunity.com/tv/${tmdbId}/${season}/${episode}${startQuery}`,
     },
-
-    // -------------------------------------------------------------
-    // Tier 2: High-Uptime Global Resolvers (Sub-600ms latency)
-    // -------------------------------------------------------------
     {
       id: "autoembed-direct",
-      name: "AutoEmbed Direct (נגן ישיר)",
+      name: "AutoEmbed Direct (נגן ייעודי ישיר)",
       type: "embed",
-      tier: 2,
+      tier: 1,
       sandboxed: true,
       quality: "1080p HD",
       url: isMovie
@@ -114,7 +110,7 @@ export function resolveStreamSources(options: StreamResolutionOptions): StreamSo
       id: "vidsrc-pm",
       name: "VidSrc Pro (Vidflix)",
       type: "embed",
-      tier: 2,
+      tier: 1,
       sandboxed: true,
       quality: "1080p FHD",
       url: isMovie
@@ -122,15 +118,26 @@ export function resolveStreamSources(options: StreamResolutionOptions): StreamSo
         : `https://vidsrc.pm/embed/tv/${tmdbId}/${season}/${episode}${startQuery}`,
     },
     {
-      id: "pressplayx",
-      name: "PressPlayX (HD)",
+      id: "cinecat-engine",
+      name: "Cinecat Engine (גיבוי מהיר)",
       type: "embed",
-      tier: 2,
+      tier: 1,
+      sandboxed: true,
+      quality: "1080p FHD",
+      url: isMovie
+        ? `https://beta.cinecat.eu/media/tmdb-movie-${tmdbId}${startQuery}`
+        : `https://beta.cinecat.eu/media/tmdb-tv-${tmdbId}/${season}/${episode}${startQuery}`,
+    },
+    {
+      id: "atlantic-server",
+      name: "Atlantic Server (גיבוי יציב)",
+      type: "embed",
+      tier: 1,
       sandboxed: true,
       quality: "1080p HD",
       url: isMovie
-        ? `https://moviesapi.to/movie/${tmdbId}?theme=e50914${startParam}`
-        : `https://moviesapi.to/tv/${tmdbId}-${season}-${episode}?theme=e50914${startParam}`,
+        ? `https://atlantic.st/watch-movie/${tmdbId}${startQuery}`
+        : `https://atlantic.st/watch-tv/${tmdbId}?season=${season}&episode=${episode}${startParam}`,
     },
 
     // -------------------------------------------------------------

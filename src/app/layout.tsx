@@ -10,12 +10,12 @@ const assistant = Assistant({
 });
 
 export const metadata: Metadata = {
-  title: "Family Stream - נטפליקס אישי למשפחה",
-  description: "אפליקציית סטרימינג משפחתית מודרנית עם ממשק פרימיום, מעקב צפייה וזיווג טלוויזיה חכם.",
+  title: "HM Stream - שירות הסטרימינג האישי שלך",
+  description: "אפליקציית סטרימינג פרימיום עם ממשק קולנועי, מעקב צפייה, כתוביות בעברית וזיווג טלוויזיה חכם.",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/icon/pwa-192x192.png",
-    apple: "/icon/pwa-192x192.png",
+    icon: "/logo.png",
+    apple: "/logo.png",
   },
 };
 

@@ -146,7 +146,7 @@ export const EpisodesModal: React.FC<EpisodesModalProps> = ({
               ) : (
                 <div className="flex flex-col gap-4">
                   {episodes.map((ep) => {
-                    const stillUrl = getImageUrl(ep.still_path, "w500");
+                    const stillUrl = getImageUrl(ep.still_path || item.backdrop_path, "w500");
 
                     return (
                       <div

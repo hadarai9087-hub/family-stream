@@ -7,7 +7,6 @@ import {
   getPopularTv,
   getTopRated,
   searchMedia,
-  getMediaDetails,
 } from "@/lib/tmdb";
 import { storageManager } from "@/lib/supabase";
 import { useTvMode, useSpatialNavigation } from "@/lib/tvNavigation";
@@ -17,26 +16,22 @@ import { Navbar } from "@/components/Navbar";
 import { HeroBanner } from "@/components/HeroBanner";
 import { MediaRow } from "@/components/MediaRow";
 import { MediaCard } from "@/components/MediaCard";
-import { ProfileSelector } from "@/components/ProfileSelector";
+import { RecommendationSection } from "@/components/RecommendationSection";
 import { EpisodesModal } from "@/components/EpisodesModal";
 import { PlayerModal } from "@/components/PlayerModal";
 import { TvPairModal } from "@/components/TvPairModal";
 import { TvFirstLoginScreen } from "@/components/TvFirstLoginScreen";
+import { LoginScreen } from "@/components/LoginScreen";
 import { TvSidebar } from "@/components/TvSidebar";
-import { authManager, Account } from "@/lib/auth";
+import { authManager, UserAccount } from "@/lib/auth";
 
 export default function HomePage() {
   const { isTvMode, toggleTvMode } = useTvMode();
   useSpatialNavigation(isTvMode);
 
-  // Auth State
-  const [account, setAccount] = useState<Account | null>(null);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-
-  // Profile State
-  const [profiles, setProfiles] = useState<UserProfile[]>([]);
-  const [currentProfile, setCurrentProfile] = useState<UserProfile | null>(null);
-  const [isLoadingProfiles, setIsLoadingProfiles] = useState(true);
+  // Auth State (R1: Personal User Accounts)
+  const [account, setAccount] = useState<UserAccount | null>(() => authManager.getCurrentUser());
+  const [preferredGenres, setPreferredGenres] = useState<number[]>(() => authManager.getCurrentUser()?.preferredGenres || []);
 
   // Content Rows
   const [heroItem, setHeroItem] = useState<MediaItem | null>(null);
@@ -60,30 +55,12 @@ export default function HomePage() {
     item: MediaItem;
     seasonNumber: number;
     episodeNumber: number;
-    episodeName?: string;
+    episodeName?: string | null;
     progressSeconds: number;
   } | null>(null);
   const [isTvPairOpen, setIsTvPairOpen] = useState(false);
 
-  // 1. Check Auth and Load Profiles on mount
-  useEffect(() => {
-    const acc = authManager.getAccount();
-    setAccount(acc);
-    setIsCheckingAuth(false);
-
-    storageManager.getProfiles().then((list) => {
-      setProfiles(list);
-      // Auto-restore previous active profile if saved
-      const savedProfileId = localStorage.getItem("active_profile_id");
-      if (savedProfileId) {
-        const found = list.find((p) => p.id === savedProfileId);
-        if (found) setCurrentProfile(found);
-      }
-      setIsLoadingProfiles(false);
-    });
-  }, []);
-
-  // 2. Load Catalog & Recommendations
+  // 2. Load Catalog
   useEffect(() => {
     getTrending().then((items) => {
       setTrending(items);
@@ -94,14 +71,12 @@ export default function HomePage() {
     getTopRated().then((items) => setTopRated(items));
   }, []);
 
-  // 3. Load User-specific Continue Watching and My List when profile changes
+  // 3. Load Per-User Continue Watching, Watchlist & Liked Genres (R1)
   useEffect(() => {
-    if (!currentProfile) return;
+    if (!account) return;
 
-    localStorage.setItem("active_profile_id", currentProfile.id);
-
-    // Continue Watching
-    storageManager.getWatchProgress(currentProfile.id).then((progressList) => {
+    // Load Watch Progress keyed by userId
+    storageManager.getWatchProgress(account.id).then((progressList) => {
       const pMap: Record<number, WatchProgress> = {};
       const cwItems: MediaItem[] = [];
 
@@ -123,11 +98,18 @@ export default function HomePage() {
       setContinueWatchingItems(cwItems);
     });
 
-    // My List
-    storageManager.getMyList(currentProfile.id).then((list) => {
+    // Load Watchlist keyed by userId
+    storageManager.getWatchlist(account.id).then((list) => {
       setMyList(list);
     });
-  }, [currentProfile]);
+
+    // Load Liked Genres
+    storageManager.getLikedGenres(account.id).then((genres) => {
+      if (genres && genres.length > 0) {
+        setPreferredGenres(genres);
+      }
+    });
+  }, [account]);
 
   // Handle Search
   const handleSearch = async (query: string) => {
@@ -142,17 +124,6 @@ export default function HomePage() {
     setSearchResults(results);
   };
 
-  // Profile Management Handlers
-  const handleSelectProfile = (profile: UserProfile) => {
-    setCurrentProfile(profile);
-  };
-
-  const handleAddProfile = async (newProfile: UserProfile) => {
-    await storageManager.saveProfile(newProfile);
-    setProfiles((prev) => [...prev, newProfile]);
-    setCurrentProfile(newProfile);
-  };
-
   // Play Actions
   const handlePlay = (item: MediaItem, progress?: WatchProgress) => {
     setInfoItem(null);
@@ -160,7 +131,7 @@ export default function HomePage() {
       item,
       seasonNumber: progress?.season_number || 1,
       episodeNumber: progress?.episode_number || 1,
-      episodeName: progress?.episode_name,
+      episodeName: progress?.episode_name || undefined,
       progressSeconds: progress?.progress_seconds || 0,
     });
   };
@@ -195,18 +166,18 @@ export default function HomePage() {
     });
   };
 
-  // My List Toggle
+  // My List / Watchlist Toggle
   const handleToggleMyList = async (item: MediaItem) => {
-    if (!currentProfile) return;
-    await storageManager.toggleMyList(currentProfile.id, item);
-    const updated = await storageManager.getMyList(currentProfile.id);
+    if (!account) return;
+    await storageManager.toggleWatchlist(account.id, item);
+    const updated = await storageManager.getWatchlist(account.id);
     setMyList(updated);
   };
 
   // Remove from Continue Watching
   const handleRemoveProgress = async (mediaId: number) => {
-    if (!currentProfile) return;
-    await storageManager.removeFromWatchProgress(currentProfile.id, mediaId);
+    if (!account) return;
+    await storageManager.removeFromWatchProgress(account.id, mediaId);
     setContinueWatchingItems((prev) => prev.filter((i) => i.id !== mediaId));
     setProgressMap((prev) => {
       const copy = { ...prev };
@@ -215,32 +186,32 @@ export default function HomePage() {
     });
   };
 
-  // 1. If not logged in, immediately render the TV-First QR screen!
+  const handleLogout = async () => {
+    await authManager.logout();
+    setAccount(null);
+  };
+
+  // Gating: If not logged in, render LoginScreen or TV-first pairing screen
   if (!account) {
-    return (
-      <TvFirstLoginScreen
-        onLoginSuccess={(acc) => {
-          setAccount(acc);
-        }}
-      />
+    return isTvMode ? (
+      <TvFirstLoginScreen onLoginSuccess={setAccount} />
+    ) : (
+      <LoginScreen isTvMode={false} onLoginSuccess={setAccount} />
     );
   }
 
-  // 2. If logged in but no profile selected, render Netflix Profile Selector
-  if (!currentProfile && !isLoadingProfiles) {
-    return (
-      <ProfileSelector
-        profiles={profiles}
-        onSelectProfile={handleSelectProfile}
-        onAddProfile={handleAddProfile}
-      />
-    );
-  }
+  // Virtual profile representation for compatibility with Navbar & TvSidebar
+  const virtualProfile: UserProfile = {
+    id: account.id,
+    name: account.username,
+    avatar: account.avatar,
+    is_kids: false,
+  };
 
   const myListIds = myList.map((m) => m.id);
 
   return (
-    <div className={`min-h-screen bg-[#141414] text-white select-none ${isTvMode ? "tv-mode text-lg" : ""}`}>
+    <div className={`min-h-screen bg-[#141414] text-white select-none ${isTvMode ? "tv-mode text-lg" : ""}`} dir="rtl">
       {/* Netflix TV Collapsible Sidebar Navigation */}
       {isTvMode && (
         <TvSidebar
@@ -250,25 +221,17 @@ export default function HomePage() {
             setSearchQuery("");
             setIsSearching(false);
           }}
-          currentProfile={currentProfile}
-          onSwitchProfile={() => setCurrentProfile(null)}
-          onLogout={() => {
-            authManager.logout();
-            setAccount(null);
-            setCurrentProfile(null);
-          }}
+          currentProfile={virtualProfile}
+          onSwitchProfile={handleLogout}
+          onLogout={handleLogout}
         />
       )}
 
       {/* Top Navbar */}
       <Navbar
-        currentProfile={currentProfile}
-        onSelectProfile={() => setCurrentProfile(null)}
-        onLogout={() => {
-          authManager.logout();
-          setAccount(null);
-          setCurrentProfile(null);
-        }}
+        currentProfile={virtualProfile}
+        onSelectProfile={handleLogout}
+        onLogout={handleLogout}
         isTvMode={isTvMode}
         onToggleTvMode={toggleTvMode}
         onOpenTvPair={() => setIsTvPairOpen(true)}
@@ -333,6 +296,23 @@ export default function HomePage() {
                   onMoreInfo={(i) => setInfoItem(i)}
                   onRemoveProgress={handleRemoveProgress}
                   isWide={true}
+                />
+              )}
+
+              {/* Personalized Recommendation Engine Section (R1) */}
+              {(activeTab === "home" || activeTab === "movies" || activeTab === "tv") && (
+                <RecommendationSection
+                  userId={account.id}
+                  preferredGenres={preferredGenres}
+                  onPreferredGenresChange={setPreferredGenres}
+                  watchHistory={Object.values(progressMap)}
+                  watchlist={myList}
+                  catalogTrending={trending}
+                  catalogTopRated={topRated}
+                  onPlay={handlePlay}
+                  onMoreInfo={(i) => setInfoItem(i)}
+                  myListIds={myListIds}
+                  onToggleMyList={handleToggleMyList}
                 />
               )}
 
@@ -412,18 +392,18 @@ export default function HomePage() {
       )}
 
       {/* Fullscreen Apple TV Floating HUD Player */}
-      {playingItem && currentProfile && (
+      {playingItem && (
         <PlayerModal
           item={playingItem.item}
           seasonNumber={playingItem.seasonNumber}
           episodeNumber={playingItem.episodeNumber}
           episodeName={playingItem.episodeName}
           initialProgressSeconds={playingItem.progressSeconds}
-          profileId={currentProfile.id}
+          profileId={account.id}
           onClose={() => {
             setPlayingItem(null);
             // Refresh Continue Watching row on return
-            storageManager.getWatchProgress(currentProfile.id).then((progressList) => {
+            storageManager.getWatchProgress(account.id).then((progressList) => {
               const pMap: Record<number, WatchProgress> = {};
               const cwItems: MediaItem[] = [];
               progressList.forEach((p) => {
@@ -451,12 +431,8 @@ export default function HomePage() {
       {isTvPairOpen && (
         <TvPairModal
           onClose={() => setIsTvPairOpen(false)}
-          onPairApproved={(acc, profileId) => {
+          onPairApproved={(acc) => {
             setAccount(acc);
-            if (profileId) {
-              const p = profiles.find((item) => item.id === profileId);
-              if (p) setCurrentProfile(p);
-            }
           }}
         />
       )}

@@ -2,24 +2,25 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { Tv, Smartphone, RefreshCw, CheckCircle2, ShieldCheck, ArrowRight } from "lucide-react";
+import { Tv, Smartphone, RefreshCw, CheckCircle2, Mail, User, ArrowRight } from "lucide-react";
 import { generateTvPairSession, listenToTvPairSession, approveTvPairSession, TvPairSession } from "@/lib/tvPairing";
-import { Account, DEFAULT_FAMILY_ACCOUNT, authManager } from "@/lib/auth";
+import { UserAccount, DEFAULT_FAMILY_ACCOUNT, authManager } from "@/lib/auth";
 
 interface TvFirstLoginScreenProps {
-  onLoginSuccess: (account: Account) => void;
+  onLoginSuccess: (account: UserAccount) => void;
 }
 
 export const TvFirstLoginScreen: React.FC<TvFirstLoginScreenProps> = ({ onLoginSuccess }) => {
   const [session, setSession] = useState<TvPairSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isApproved, setIsApproved] = useState(false);
-  const [approvedAccount, setApprovedAccount] = useState<Account | null>(null);
+  const [approvedAccount, setApprovedAccount] = useState<UserAccount | null>(null);
 
-  // Manual fallback toggle for phone/pc users who want email/password
+  // Manual fallback toggle for users who want direct email entry
   const [showManualLogin, setShowManualLogin] = useState(false);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const refreshPairCode = () => {
     setIsLoading(true);
@@ -53,25 +54,46 @@ export const TvFirstLoginScreen: React.FC<TvFirstLoginScreenProps> = ({ onLoginS
   // Demo simulation button: instant 1-click test of phone scan
   const handleSimulatePhoneApproval = () => {
     if (session) {
-      approveTvPairSession(session.code, DEFAULT_FAMILY_ACCOUNT, "p1");
+      approveTvPairSession(session.code, DEFAULT_FAMILY_ACCOUNT);
     }
   };
 
   const handleManualLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const acc = await authManager.login(email || DEFAULT_FAMILY_ACCOUNT.email, password);
-    onLoginSuccess(acc);
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanUsername = username.trim();
+
+    if (!cleanEmail || !cleanEmail.includes("@")) {
+      setErrorMsg("נא להזין כתובת אימייל תקינה");
+      return;
+    }
+
+    try {
+      const acc = await authManager.loginPasswordless(cleanEmail, cleanUsername);
+      onLoginSuccess(acc);
+    } catch {
+      setErrorMsg("שגיאה בהתחברות");
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0d0d0e] flex flex-col items-center justify-center p-6 md:p-12 select-none overflow-hidden animate-in fade-in duration-300">
-      {/* Cinematic Dark Netflix Background Montage */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-neutral-900/40 via-[#0d0d0e] to-[#0a0a0b] pointer-events-none" />
+    <div className="fixed inset-0 z-50 bg-[#0d0d0e] flex flex-col items-center justify-center p-6 md:p-12 select-none overflow-hidden animate-in fade-in duration-300" dir="rtl">
+      {/* Cinematic Dark Background Montage */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-950/30 via-[#0d0d0e] to-[#0a0a0b] pointer-events-none" />
 
       {/* Top TV Logo */}
       <div className="absolute top-8 right-8 md:right-16 z-20 flex items-center gap-3">
-        <span className="text-[#e50914] font-black text-3xl md:text-5xl tracking-tighter uppercase drop-shadow-[0_2px_15px_rgba(229,9,20,0.6)]">
-          STREAM
+        <div className="p-2 bg-black/60 rounded-xl border border-white/10 shadow-lg">
+          <Image
+            src="/logo.png"
+            alt="HM Logo"
+            width={48}
+            height={48}
+            className="h-9 md:h-12 w-auto object-contain drop-shadow-[0_2px_12px_rgba(229,9,20,0.6)]"
+          />
+        </div>
+        <span className="text-white font-black text-2xl md:text-4xl tracking-wider">
+          HM<span className="text-[#e50914]">STREAM</span>
         </span>
         <span className="bg-[#e50914]/20 border border-[#e50914]/40 text-[#e50914] text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wider">
           TV EDITION
@@ -87,79 +109,101 @@ export const TvFirstLoginScreen: React.FC<TvFirstLoginScreenProps> = ({ onLoginS
           <h1 className="text-3xl md:text-5xl font-black text-white mb-3">
             הטלוויזיה חוברה בהצלחה!
           </h1>
-          <p className="text-lg text-neutral-400">
-            ברוך הבא, {approvedAccount?.familyName || "משפחה"}. טוען את הפרופילים...
+          <p className="text-lg text-neutral-300">
+            ברוך הבא, {approvedAccount?.username || "צופה"}. טוען את הקטלוג האישי שלך...
           </p>
         </div>
       ) : showManualLogin ? (
-        /* Optional fallback: Email / Password */
-        <div className="relative z-20 w-full max-w-md bg-[#181818]/90 border border-white/10 p-8 rounded-3xl shadow-2xl backdrop-blur-md">
-          <h2 className="text-2xl font-black text-white mb-2 text-right">התחברות רגילה</h2>
-          <p className="text-xs text-neutral-400 mb-6 text-right">לצפייה ממחשב אישי או טאבלט</p>
+        /* Optional fallback: Direct Passwordless Email */
+        <div className="relative z-20 w-full max-w-md bg-[#181818]/95 border border-white/15 p-8 rounded-3xl shadow-2xl backdrop-blur-md">
+          <h2 className="text-2xl font-black text-white mb-2 text-right">התחברות אישית ישירה</h2>
+          <p className="text-xs text-neutral-400 mb-6 text-right">כניסה ללא סיסמה באמצעות אימייל</p>
+
+          {errorMsg && (
+            <div className="mb-4 p-3 bg-red-950/60 border border-red-800/60 rounded-xl text-red-200 text-xs">
+              {errorMsg}
+            </div>
+          )}
+
           <form onSubmit={handleManualLogin} className="space-y-4">
-            <input
-              type="email"
-              placeholder="אימייל"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-black/60 border border-white/20 text-white p-3 rounded-xl text-right text-sm focus:outline-none focus:border-[#e50914]"
-            />
-            <input
-              type="password"
-              placeholder="סיסמה"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-black/60 border border-white/20 text-white p-3 rounded-xl text-right text-sm focus:outline-none focus:border-[#e50914]"
-            />
+            <div className="relative">
+              <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-neutral-400">
+                <Mail size={16} />
+              </div>
+              <input
+                type="email"
+                required
+                placeholder="כתובת אימייל"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-black/60 border border-white/20 text-white pr-10 pl-3 py-3 rounded-xl text-right text-sm focus:outline-none focus:border-[#e50914]"
+              />
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-neutral-400">
+                <User size={16} />
+              </div>
+              <input
+                type="text"
+                placeholder="שם משתמש (אופציונלי)"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full bg-black/60 border border-white/20 text-white pr-10 pl-3 py-3 rounded-xl text-right text-sm focus:outline-none focus:border-[#e50914]"
+              />
+            </div>
+
             <button
               type="submit"
-              className="w-full bg-[#e50914] text-white font-bold py-3 rounded-xl text-sm hover:bg-[#b80710] transition-colors"
+              className="w-full bg-[#e50914] text-white font-bold py-3.5 rounded-xl text-sm hover:bg-[#b80710] transition-colors shadow-lg cursor-pointer"
             >
               התחבר
             </button>
+
             <button
               type="button"
               onClick={() => setShowManualLogin(false)}
-              className="w-full text-xs text-neutral-400 hover:text-white py-2"
+              className="w-full text-xs text-neutral-400 hover:text-white py-2 flex items-center justify-center gap-1.5 cursor-pointer"
             >
-              חזור לברקוד טלוויזיה &larr;
+              <ArrowRight size={14} />
+              <span>חזור לזיווג באמצעות QR & PIN</span>
             </button>
           </form>
         </div>
       ) : (
         /* The TV-First Main Screen (QR Code & PIN) */
         <div className="relative z-20 w-full max-w-5xl flex flex-col md:flex-row items-center justify-between gap-10 md:gap-16">
-          {/* Left/Right Text Column (RTL instructions for TV 10-foot viewing) */}
+          {/* Left/Right Text Column */}
           <div className="flex-1 text-right flex flex-col items-start order-2 md:order-1">
             <div className="flex items-center gap-2 text-[#e50914] font-bold text-sm md:text-base mb-3">
               <Tv size={22} />
-              <span>התחברות מהירה בשלט רחוק</span>
+              <span>התחברות מהירה ללא הקלדה בשלט</span>
             </div>
 
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-tight mb-6 tracking-tight">
               התחברות בטלוויזיה
             </h1>
 
-            <div className="space-y-5 text-neutral-300 text-base md:text-xl font-medium mb-8">
+            <div className="space-y-4 text-neutral-300 text-base md:text-xl font-medium mb-8">
               <div className="flex items-center gap-4">
                 <span className="w-9 h-9 rounded-full bg-[#e50914] text-white font-bold flex items-center justify-center text-sm flex-shrink-0 shadow-lg">
                   1
                 </span>
-                <span>פתח את המצלמה בטלפון החכם וסרוק את הברקוד.</span>
+                <span>פתח את המצלמה בטלפון וסרוק את קוד ה-QR.</span>
               </div>
 
               <div className="flex items-center gap-4">
                 <span className="w-9 h-9 rounded-full bg-white/10 border border-white/20 text-white font-bold flex items-center justify-center text-sm flex-shrink-0">
                   2
                 </span>
-                <span>לחץ בטלפון על &quot;אישור התחברות לטלוויזיה&quot;.</span>
+                <span>לחץ בנייד על &quot;אישור התחברות לטלוויזיה&quot;.</span>
               </div>
 
               <div className="flex items-center gap-4">
                 <span className="w-9 h-9 rounded-full bg-white/10 border border-white/20 text-white font-bold flex items-center justify-center text-sm flex-shrink-0">
                   3
                 </span>
-                <span>הטלוויזיה תיפתח מיד ותישאר מחוברת לתמיד!</span>
+                <span>הטלוויזיה נפתחת מיידית עם הקטלוג וההמלצות שלך!</span>
               </div>
             </div>
 
@@ -167,7 +211,7 @@ export const TvFirstLoginScreen: React.FC<TvFirstLoginScreenProps> = ({ onLoginS
             {session && (
               <div className="bg-white/5 border border-white/10 p-4 md:p-6 rounded-2xl w-full">
                 <span className="text-xs md:text-sm text-neutral-400 block mb-2 font-medium">
-                  או גלוש בטלפון לכתובת <strong className="text-white font-mono">stream.local/pair</strong> והזן קוד:
+                  או גלוש בנייד ל- <strong className="text-white font-mono">/pair</strong> והזן קוד:
                 </span>
                 <div className="text-3xl md:text-5xl font-mono font-black tracking-widest text-[#e50914] bg-black/80 px-6 py-3 rounded-xl border border-white/15 text-center shadow-inner">
                   {session.code}
@@ -175,12 +219,12 @@ export const TvFirstLoginScreen: React.FC<TvFirstLoginScreenProps> = ({ onLoginS
               </div>
             )}
 
-            {/* Quick Testing Actions (Focusable with remote) */}
+            {/* Quick Testing Actions */}
             <div className="flex items-center gap-4 mt-6 flex-wrap">
               <button
                 type="button"
                 onClick={handleSimulatePhoneApproval}
-                className="bg-white/10 hover:bg-white/20 border border-white/15 text-white text-xs md:text-sm font-semibold px-4 py-2.5 rounded-xl transition-all tv-focusable flex items-center gap-2"
+                className="bg-white/10 hover:bg-white/20 border border-white/15 text-white text-xs md:text-sm font-semibold px-4 py-2.5 rounded-xl transition-all tv-focusable flex items-center gap-2 cursor-pointer"
                 title="סימולציה בלחיצה אחת לאישור מהטלפון"
               >
                 <Smartphone size={16} className="text-[#46d369]" />
@@ -190,7 +234,7 @@ export const TvFirstLoginScreen: React.FC<TvFirstLoginScreenProps> = ({ onLoginS
               <button
                 type="button"
                 onClick={refreshPairCode}
-                className="text-neutral-400 hover:text-white text-xs md:text-sm transition-colors flex items-center gap-1.5 tv-focusable"
+                className="text-neutral-400 hover:text-white text-xs md:text-sm transition-colors flex items-center gap-1.5 tv-focusable cursor-pointer"
               >
                 <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
                 <span>רענן קוד</span>
@@ -199,14 +243,14 @@ export const TvFirstLoginScreen: React.FC<TvFirstLoginScreenProps> = ({ onLoginS
               <button
                 type="button"
                 onClick={() => setShowManualLogin(true)}
-                className="text-neutral-500 hover:text-neutral-300 text-xs transition-colors"
+                className="text-neutral-500 hover:text-neutral-300 text-xs transition-colors cursor-pointer"
               >
-                התחבר עם אימייל וסיסמה &larr;
+                התחבר ישירות עם אימייל &larr;
               </button>
             </div>
           </div>
 
-          {/* Right/Left Large QR Code Box */}
+          {/* Large QR Code Box */}
           <div className="flex flex-col items-center justify-center order-1 md:order-2">
             <div className="relative group p-4 md:p-6 bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.8),_0_0_50px_rgba(229,9,20,0.3)] transition-transform duration-300 hover:scale-105">
               {isLoading || !session ? (
@@ -229,7 +273,7 @@ export const TvFirstLoginScreen: React.FC<TvFirstLoginScreenProps> = ({ onLoginS
 
             <div className="mt-4 flex items-center gap-2 text-xs md:text-sm text-neutral-400">
               <Smartphone size={16} className="text-[#e50914]" />
-              <span>סריקה במצלמת הטלפון פותחת את האפליקציה מיד</span>
+              <span>סריקה במצלמת הטלפון מחברת את הטלוויזיה מיידית</span>
             </div>
           </div>
         </div>

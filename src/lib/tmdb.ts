@@ -1,4 +1,4 @@
-import { MediaItem, Season, Episode } from "@/types";
+import { MediaItem, Episode } from "@/types";
 
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 // Public key or env key:
@@ -105,19 +105,83 @@ export async function getMediaDetails(id: number, mediaType: "movie" | "tv"): Pr
 }
 
 export async function getSeasonEpisodes(tvId: number, seasonNumber: number): Promise<Episode[]> {
-  const data = await fetchFromTmdb<any>(`/tv/${tvId}/season/${seasonNumber}`);
-  if (!data?.episodes) return [];
+  const [heData, enData] = await Promise.all([
+    fetchFromTmdb<any>(`/tv/${tvId}/season/${seasonNumber}`, { language: "he-IL" }),
+    fetchFromTmdb<any>(`/tv/${tvId}/season/${seasonNumber}`, { language: "en-US" }),
+  ]);
 
-  return data.episodes.map((ep: any) => ({
-    id: ep.id,
-    episode_number: ep.episode_number,
-    season_number: ep.season_number,
-    name: ep.name || `פרק ${ep.episode_number}`,
-    overview: ep.overview || "אין תקציר זמין בעברית לפרק זה.",
-    still_path: ep.still_path,
-    runtime: ep.runtime,
-    vote_average: ep.vote_average,
-  }));
+  const episodesSource = heData?.episodes || enData?.episodes;
+  if (!episodesSource || episodesSource.length === 0) return [];
+
+  const enEpMap = new Map<number, any>();
+  if (enData?.episodes) {
+    for (const ep of enData.episodes) {
+      enEpMap.set(ep.episode_number, ep);
+    }
+  }
+
+  return episodesSource.map((ep: any) => {
+    const enEp = enEpMap.get(ep.episode_number);
+
+    // Prefer Hebrew name if present and not generic; otherwise fall back to English title
+    const isGenericHebrewName = !ep.name || ep.name === `פרק ${ep.episode_number}` || ep.name === `Episode ${ep.episode_number}`;
+    const name = !isGenericHebrewName ? ep.name : (enEp?.name || ep.name || `פרק ${ep.episode_number}`);
+
+    // Overview fallback: if Hebrew is empty, use English summary
+    const overview = ep.overview?.trim()
+      ? ep.overview.trim()
+      : (enEp?.overview?.trim() || "תקציר הפרק זמין לצפייה בשידור חי.");
+
+    // Still image: if Hebrew payload has no still_path, use English payload still_path
+    const still_path = ep.still_path || enEp?.still_path || null;
+
+    return {
+      id: ep.id,
+      episode_number: ep.episode_number,
+      season_number: ep.season_number,
+      name,
+      overview,
+      still_path,
+      runtime: ep.runtime || enEp?.runtime,
+      vote_average: ep.vote_average || enEp?.vote_average,
+    };
+  });
+}
+
+export async function getMovieRecommendations(movieId: number): Promise<MediaItem[]> {
+  const data = await fetchFromTmdb<{ results: any[] }>(`/movie/${movieId}/recommendations`);
+  if (!data?.results || data.results.length === 0) return [];
+  return data.results.map((item) => formatMediaItem({ ...item, media_type: "movie" }));
+}
+
+export async function getTvRecommendations(tvId: number): Promise<MediaItem[]> {
+  const data = await fetchFromTmdb<{ results: any[] }>(`/tv/${tvId}/recommendations`);
+  if (!data?.results || data.results.length === 0) return [];
+  return data.results.map((item) => formatMediaItem({ ...item, media_type: "tv" }));
+}
+
+export async function getSimilarMovies(movieId: number): Promise<MediaItem[]> {
+  const data = await fetchFromTmdb<{ results: any[] }>(`/movie/${movieId}/similar`);
+  if (!data?.results || data.results.length === 0) return [];
+  return data.results.map((item) => formatMediaItem({ ...item, media_type: "movie" }));
+}
+
+export async function getSimilarTv(tvId: number): Promise<MediaItem[]> {
+  const data = await fetchFromTmdb<{ results: any[] }>(`/tv/${tvId}/similar`);
+  if (!data?.results || data.results.length === 0) return [];
+  return data.results.map((item) => formatMediaItem({ ...item, media_type: "tv" }));
+}
+
+export async function getDiscoverMedia(
+  mediaType: "movie" | "tv",
+  params: Record<string, string> = {}
+): Promise<MediaItem[]> {
+  const data = await fetchFromTmdb<{ results: any[] }>(`/discover/${mediaType}`, {
+    sort_by: "popularity.desc",
+    ...params,
+  });
+  if (!data?.results) return [];
+  return data.results.map((item) => formatMediaItem({ ...item, media_type: mediaType }));
 }
 
 function formatMediaItem(item: any): MediaItem {

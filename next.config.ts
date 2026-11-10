@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  experimental: {
+    agentUpgrade: false,
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "image.tmdb.org" },

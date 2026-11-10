@@ -12,7 +12,8 @@
     "pm2:stop": "npx pm2 stop ecosystem.config.cjs",
     "pm2:restart": "npx pm2 restart ecosystem.config.cjs",
     "pm2:status": "npx pm2 status",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node scripts/verify-e2e-platform.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3",

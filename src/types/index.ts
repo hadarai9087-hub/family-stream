@@ -52,7 +52,9 @@ export interface UserProfile {
 
 export interface WatchProgress {
   id?: string;
-  profile_id: string;
+  profile_id?: string;
+  userId?: string;
+  user_id?: string;
   media_id: number;
   media_type: MediaType;
   title: string;
@@ -60,11 +62,64 @@ export interface WatchProgress {
   backdrop_path: string | null;
   season_number?: number;
   episode_number?: number;
-  episode_name?: string;
+  episode_name?: string | null;
   progress_seconds: number;
   duration_seconds: number;
   percentage: number;
+  genre_ids?: number[];
   updated_at: string;
+}
+
+export interface UserAccount {
+  id: string;
+  email: string;
+  username: string;
+  avatar: string;
+  preferredGenres: number[]; // TMDB genre IDs
+  createdAt: number | string;
+  lastLoginAt?: string;
+  token?: string;
+  familyName?: string; // backwards compatibility with legacy Account
+}
+
+export interface UserSession {
+  user: UserAccount;
+  token: string;
+  expiresAt: number; // Unix timestamp ms
+}
+
+export interface UserWatchProgress {
+  userId: string;
+  mediaId: number;
+  mediaType: MediaType;
+  title: string;
+  posterPath: string | null;
+  backdropPath: string | null;
+  seasonNumber?: number;
+  episodeNumber?: number;
+  episodeName?: string;
+  currentTime: number;
+  duration: number;
+  percentage: number;
+  updatedAt: string;
+}
+
+export interface UserWatchlistItem {
+  userId: string;
+  mediaId: number;
+  mediaType: MediaType;
+  title: string;
+  posterPath: string | null;
+  backdropPath: string | null;
+  voteAverage: number;
+  addedAt: string;
+}
+
+export interface UserGenrePreferences {
+  userId: string;
+  explicitGenreIds: number[];
+  computedGenreAffinities: Record<number, number>;
+  updatedAt: string;
 }
 
 export interface SubtitleTrack {

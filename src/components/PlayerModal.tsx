@@ -24,7 +24,7 @@ interface PlayerModalProps {
   item: MediaItem;
   seasonNumber?: number;
   episodeNumber?: number;
-  episodeName?: string;
+  episodeName?: string | null;
   initialProgressSeconds?: number;
   profileId: string;
   onClose: () => void;
@@ -266,9 +266,11 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
     (time: number, force = false) => {
       if (time <= 0) return;
       const percentage = Math.min(100, Math.round((time / Math.max(1, duration)) * 100));
+      const genreIds = item.genre_ids || (item.genres ? item.genres.map((g) => g.id) : undefined);
       storageManager.saveWatchProgress(
         {
           profile_id: profileId,
+          userId: profileId,
           media_id: item.id,
           media_type: item.media_type,
           title: item.title,
@@ -280,6 +282,7 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
           progress_seconds: time,
           duration_seconds: duration,
           percentage,
+          genre_ids: genreIds,
           updated_at: new Date().toISOString(),
         },
         { force }

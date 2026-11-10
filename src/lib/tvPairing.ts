@@ -36,11 +36,20 @@ export async function generateTvPairSession(): Promise<TvPairSession> {
     },
   });
 
-  const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes expiry
+  const expiresAt = Date.now() + 15 * 60 * 1000; // 15 minutes expiry
 
+  // 1. Notify Serverless API endpoint
+  if (typeof window !== "undefined") {
+    fetch("/api/pair", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "create", code }),
+    }).catch(() => {});
+  }
+
+  // 2. Notify Supabase if configured
   if (isSupabaseConfigured && supabase) {
     try {
-      // Clean up old expired sessions to prevent storage accumulation
       await supabase.from("tv_pairings").delete().lt("expires_at", new Date().toISOString());
       await supabase.from("tv_pairings").insert({
         code,
@@ -60,8 +69,26 @@ export async function generateTvPairSession(): Promise<TvPairSession> {
  * Passes the logged in account so TV receives the session
  */
 export async function approveTvPairSession(code: string, account: Account, profileId?: string): Promise<boolean> {
+  const cleanCode = code.trim().toUpperCase();
   const data: TvPairApprovalData = { account, profileId };
 
+  let apiSuccess = false;
+
+  // 1. Send approval to Serverless API endpoint
+  if (typeof window !== "undefined") {
+    try {
+      const res = await fetch("/api/pair", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: cleanCode, account }),
+      });
+      apiSuccess = res.ok;
+    } catch (err) {
+      console.warn("Error calling /api/pair:", err);
+    }
+  }
+
+  // 2. Update Supabase if configured
   if (isSupabaseConfigured && supabase) {
     const { error } = await supabase
       .from("tv_pairings")
@@ -70,36 +97,47 @@ export async function approveTvPairSession(code: string, account: Account, profi
         account_data: JSON.stringify(account),
         profile_id: profileId,
       })
-      .eq("code", code.toUpperCase());
-    return !error;
+      .eq("code", cleanCode);
+    if (!error) apiSuccess = true;
   }
 
-  // Local storage broadcast for same network / demo:
+  // 3. Local storage broadcast for same browser / demo
   if (typeof window !== "undefined") {
-    localStorage.setItem(`tv_pair_approved_${code.toUpperCase()}`, JSON.stringify(data));
-    return true;
+    localStorage.setItem(`tv_pair_approved_${cleanCode}`, JSON.stringify(data));
+    apiSuccess = true;
   }
-  return false;
+
+  return apiSuccess;
 }
 
 /**
  * Listens to pairing status on the TV.
- * When approved, sets the account on the TV and calls onApproved.
+ * When approved from a phone or web session, sets the account on the TV and calls onApproved.
  */
 export function listenToTvPairSession(code: string, onApproved: (data: TvPairApprovalData) => void): () => void {
+  const cleanCode = code.trim().toUpperCase();
+  let isApprovedHandled = false;
+
+  const handleApproval = (data: TvPairApprovalData) => {
+    if (isApprovedHandled) return;
+    isApprovedHandled = true;
+    authManager.setAccount(data.account);
+    onApproved(data);
+  };
+
+  // 1. Supabase Realtime channel if configured
+  let supabaseChannel: any = null;
   if (isSupabaseConfigured && supabase) {
-    const channel = supabase
-      .channel(`tv_pair_${code}`)
+    supabaseChannel = supabase
+      .channel(`tv_pair_${cleanCode}`)
       .on(
         "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "tv_pairings", filter: `code=eq.${code}` },
+        { event: "UPDATE", schema: "public", table: "tv_pairings", filter: `code=eq.${cleanCode}` },
         (payload: any) => {
           if (payload.new.status === "approved") {
             try {
-              let account: Account = JSON.parse(payload.new.account_data || "{}");
-              authManager.setAccount(account);
-              supabase?.removeChannel(channel);
-              onApproved({ account, profileId: payload.new.profile_id });
+              const account: Account = JSON.parse(payload.new.account_data || "{}");
+              handleApproval({ account, profileId: payload.new.profile_id });
             } catch (e) {
               console.error("Error handling approved pairing:", e);
             }
@@ -107,29 +145,53 @@ export function listenToTvPairSession(code: string, onApproved: (data: TvPairApp
         }
       )
       .subscribe();
-
-    return () => {
-      supabase?.removeChannel(channel);
-    };
   }
 
-  // Local poll fallback
-  const interval = setInterval(() => {
+  // 2. High-Frequency Real-Time Polling against /api/pair and localStorage
+  const interval = setInterval(async () => {
+    if (isApprovedHandled) {
+      clearInterval(interval);
+      return;
+    }
+
+    // A. Check localStorage
     if (typeof window !== "undefined") {
-      const stored = localStorage.getItem(`tv_pair_approved_${code.toUpperCase()}`);
+      const stored = localStorage.getItem(`tv_pair_approved_${cleanCode}`);
       if (stored) {
         clearInterval(interval);
-        localStorage.removeItem(`tv_pair_approved_${code.toUpperCase()}`);
+        localStorage.removeItem(`tv_pair_approved_${cleanCode}`);
         try {
           const parsed: TvPairApprovalData = JSON.parse(stored);
-          authManager.setAccount(parsed.account);
-          onApproved(parsed);
+          handleApproval(parsed);
+          return;
         } catch (e) {
           console.error("Failed to parse TV pairing payload:", e);
         }
       }
     }
+
+    // B. Check Serverless API endpoint
+    if (typeof window !== "undefined") {
+      try {
+        const res = await fetch(`/api/pair?code=${encodeURIComponent(cleanCode)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.status === "approved" && data.account) {
+            clearInterval(interval);
+            handleApproval({ account: data.account });
+            return;
+          }
+        }
+      } catch {
+        // Silently retry on next poll tick
+      }
+    }
   }, 1200);
 
-  return () => clearInterval(interval);
+  return () => {
+    clearInterval(interval);
+    if (supabaseChannel && supabase) {
+      supabase.removeChannel(supabaseChannel);
+    }
+  };
 }

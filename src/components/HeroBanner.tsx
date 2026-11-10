@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
-import { Play, Info, Volume2, VolumeX, Plus, Check } from "lucide-react";
+import { Play, Info, Plus, Check } from "lucide-react";
 import { MediaItem } from "@/types";
 import { getImageUrl } from "@/lib/tmdb";
 
@@ -21,8 +21,6 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   isInMyList = false,
   onToggleMyList,
 }) => {
-  const [isMuted, setIsMuted] = useState(true);
-
   const backdropUrl = getImageUrl(item.backdrop_path, "original");
 
   return (
@@ -101,15 +99,6 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
               {isInMyList ? <Check size={20} className="text-[#46d369]" /> : <Plus size={20} />}
             </button>
           )}
-
-          {/* Mute toggle button */}
-          <button
-            onClick={() => setIsMuted(!isMuted)}
-            className="p-2.5 md:p-3 rounded-full border border-white/30 bg-black/40 hover:bg-black/60 text-white transition-all duration-200 tv-focusable hover:scale-110 mr-auto"
-            title={isMuted ? "הפעל קול" : "השתק"}
-          >
-            {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-          </button>
         </div>
       </div>
     </div>

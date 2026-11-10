@@ -50,8 +50,12 @@ export function resolveStreamSources(options: StreamResolutionOptions): StreamSo
   const resumePos = Math.floor(startAt ?? resumeSeconds ?? 0);
   const startParam = resumePos > 0 ? `&startAt=${resumePos}` : "";
   const startQuery = resumePos > 0 ? `?startAt=${resumePos}` : "";
-  const subParam = subtitleUrl
-    ? `&sub_file=${encodeURIComponent(subtitleUrl)}&sub_label=${encodeURIComponent(subtitleLabel)}`
+  let fullSubtitleUrl = subtitleUrl;
+  if (fullSubtitleUrl && fullSubtitleUrl.startsWith("/") && typeof window !== "undefined") {
+    fullSubtitleUrl = `${window.location.origin}${fullSubtitleUrl}`;
+  }
+  const subParam = fullSubtitleUrl
+    ? `&sub_file=${encodeURIComponent(fullSubtitleUrl)}&sub_label=${encodeURIComponent(subtitleLabel)}`
     : "";
 
   const sources: StreamSource[] = [

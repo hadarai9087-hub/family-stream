@@ -85,6 +85,42 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
     currentTimeRef.current = currentTime;
   }, [currentTime]);
 
+  // Skip Intro State (Aether & Netflix Style)
+  const [hasSkippedIntro, setHasSkippedIntro] = useState(false);
+  const isIntroWindow =
+    item.media_type === "tv" && currentTime >= 12 && currentTime <= 88 && !hasSkippedIntro;
+
+  const handleSkipIntro = useCallback(() => {
+    setHasSkippedIntro(true);
+    setCurrentTime(90);
+    currentTimeRef.current = 90;
+    setStatusMessage("דילגת על הפתיח (+85 שניות)");
+    setStatusVisible(true);
+    setTimeout(() => setStatusVisible(false), 2500);
+
+    try {
+      iframeRef.current?.contentWindow?.postMessage(
+        JSON.stringify({ event: "command", func: "seekTo", args: [90, true] }),
+        "*"
+      );
+    } catch {}
+  }, []);
+
+  // Auto-skip Intro if enabled in user settings (like Aether)
+  useEffect(() => {
+    if (isIntroWindow && !hasSkippedIntro) {
+      try {
+        const savedSettings = localStorage.getItem("hm_app_settings");
+        if (savedSettings) {
+          const parsed = JSON.parse(savedSettings);
+          if (parsed.autoSkipIntro) {
+            handleSkipIntro();
+          }
+        }
+      } catch {}
+    }
+  }, [isIntroWindow, hasSkippedIntro, handleSkipIntro]);
+
   // Load Subtitle Tracks
   useEffect(() => {
     let isMounted = true;
@@ -530,6 +566,23 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
               <div key={idx}>{line}</div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Skip Intro Floating Pill (Aether / Netflix Style) */}
+      {isIntroWindow && (
+        <div className="absolute bottom-20 left-8 md:left-14 z-40 animate-in fade-in slide-in-from-bottom-3 duration-300">
+          <button
+            type="button"
+            onClick={handleSkipIntro}
+            className="group relative flex items-center gap-3 px-5 py-3 rounded-2xl bg-black/85 hover:bg-black border border-white/25 hover:border-[#e50914] text-white shadow-[0_10px_35px_rgba(0,0,0,0.8),_0_0_20px_rgba(229,9,20,0.4)] backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer tv-focusable"
+          >
+            <div className="w-7 h-7 rounded-full bg-[#e50914]/25 border border-[#e50914]/50 flex items-center justify-center text-[#e50914] group-hover:scale-110 transition-transform">
+              <FastForward size={16} className="fill-current animate-pulse" />
+            </div>
+            <span className="text-sm font-bold tracking-wide">דלג על פתיח</span>
+            <div className="absolute -bottom-px inset-x-4 h-0.5 bg-gradient-to-r from-transparent via-[#e50914] to-transparent opacity-90" />
+          </button>
         </div>
       )}
 

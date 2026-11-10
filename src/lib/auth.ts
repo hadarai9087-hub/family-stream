@@ -15,6 +15,12 @@ export const AVATAR_POOL = [
   "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=80",
   "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&auto=format&fit=crop&q=80",
   "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=200&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=200&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&auto=format&fit=crop&q=80",
 ];
 
 // Default family account for instant 1-click use
@@ -216,6 +222,26 @@ export const authManager = {
         console.warn("Supabase updatePreferredGenres error:", err);
       }
     }
+  },
+
+  updateUserProfile: async (updates: { avatar?: string; username?: string }): Promise<UserAccount | null> => {
+    const current = authManager.getCurrentUser();
+    if (!current) return null;
+    const updated: UserAccount = {
+      ...current,
+      username: updates.username ? updates.username.trim() : current.username,
+      avatar: updates.avatar || current.avatar,
+    };
+    authManager.setAccount(updated);
+
+    if (isFirebaseConfigured) {
+      try {
+        await firebaseManager.saveUser(updated);
+      } catch (err) {
+        console.warn("Firebase updateUserProfile error:", err);
+      }
+    }
+    return updated;
   },
 
   logout: async (): Promise<void> => {

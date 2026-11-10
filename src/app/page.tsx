@@ -433,7 +433,7 @@ export default function HomePage() {
       )}
       {/* Floating Bottom-Right User Profile & Settings Menu (ימינה למטה) */}
       {!isTvMode && (
-        <UserCornerMenu account={account} onLogout={handleLogout} />
+        <UserCornerMenu account={account} onLogout={handleLogout} onAccountUpdated={setAccount} />
       )}
     </div>
   );

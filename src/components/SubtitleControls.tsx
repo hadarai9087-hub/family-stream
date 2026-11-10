@@ -200,6 +200,11 @@ export const SubtitleControls: React.FC<SubtitleControlsProps> = ({
           </div>
         )}
 
+        <div className="p-3 bg-white/5 border border-white/10 rounded-2xl text-[11px] text-neutral-300 leading-relaxed text-right">
+          <span className="text-white font-bold block mb-1">טיפ כתוביות בנגן:</span>
+          במרבית השרתים (כמו VidLink Pro ו-Cinecat), ניתן גם לבחור כתוביות בעברית ישירות מתוך נגן הווידאו עצמו על ידי לחיצה על כפתור <strong>CC</strong> או גלגל השיניים שבתחתית הנגן.
+        </div>
+
         {/* Footer */}
         <button
           onClick={onClose}
